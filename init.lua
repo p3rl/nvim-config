@@ -28,9 +28,16 @@ paq {'lifepillar/vim-gruvbox8'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 
+--local p4 = require('p4/p4')
+
 -- Settings
 -------------------------------------------------------------------------------
+cmd 'language en'
+cmd 'syntax enable'
+cmd 'filetype on'
+cmd 'set clipboard+=unnamedplus'
 cmd 'colorscheme gruvbox8_hard'
+cmd 'set background=light'
 --cmd 'set listchars=space:_'
 
 -- Tabs
@@ -63,6 +70,8 @@ opt('o', 'ttyfast', true)                               -- Should make scrolling
 opt('o', 'lazyredraw', true)                            -- Same as above
 opt('o', 'ignorecase', true)                            -- 
 opt('o', 'smartcase', true)                             -- 
+opt('o', 'foldmethod', 'syntax')                        -- Fold method
+opt('o', 'foldcolumn', '2')                             -- Fold columns
 
 -- Commands
 -------------------------------------------------------------------------------
@@ -72,14 +81,17 @@ cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
 
 -- Mappings
 -------------------------------------------------------------------------------
+map('n', '<F12>', '<cmd>execute printf(":tag %s", expand("<cword>"))<CR>')
+map('n', '-', '<cmd>Explore<CR>')
 map('n', '<C-F12>', '<cmd>EditConfig<CR>')
-
-map('i', 'jj', '<ESC>')
-map('i', 'jk', '<ESC>')
 map('n', '<C-s>', '<cmd>w<CR>')
 map('n', '<S-l>', '$')
 map('n', '<S-h>', '0')
 map('n', '<Esc>', '<cmd>noh<CR>')
-
 map('n', '<C-p>', '<cmd>Files<CR>')
 map('n', '<C-;>', '<cmd>Buffers<CR>')
+map('n', '<F10>', '<cmd>CopyPath<CR>')
+map('i', 'jj', '<ESC>')
+map('i', 'jk', '<ESC>')
+map('i', '{', '{}<Left>')
+map('i', '[', '[]<Left>')
