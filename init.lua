@@ -31,9 +31,11 @@ paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
 paq {'lifepillar/vim-gruvbox8'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
+paq {'arcticicestudio/nord-vim'}
 
 _G.p4 = require('p4/p4')
 _G.psue = require('psue/psue')
+_G.grep = require('grep/grep')
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -41,8 +43,9 @@ cmd 'language en'
 cmd 'syntax enable'
 cmd 'filetype on'
 cmd 'set clipboard+=unnamedplus'
-cmd 'colorscheme gruvbox8_hard'
-cmd 'set background=light'
+cmd 'colorscheme nord'
+--cmd 'set background=light'
+cmd 'noswapfile'
 --cmd 'set listchars=space:_'
 set_var('mapleader', ',')
 
@@ -59,6 +62,7 @@ opt('o', 'smarttab', true)                              -- When on, a <Tab> in f
 opt('b', 'cindent', true)
 cmd 'set listchars=tab::.'                              -- Show tabs
 
+opt('w', 'cursorline', true)                            -- Highlight current line
 opt('w', 'list', true)                                  -- Show some invisible characters (tabs...)
 opt('w', 'number', true)                                -- Print line number
 opt('w', 'relativenumber', false)                       -- Relative line numbers
@@ -78,6 +82,7 @@ opt('o', 'ignorecase', true)                            --
 opt('o', 'smartcase', true)                             -- 
 opt('w', 'foldmethod', 'syntax')                        -- Fold method
 opt('o', 'foldcolumn', '2')                             -- Fold columns
+opt('o', 'foldlevel', 99)                              -- Default fold level
 
 -- Commands
 -------------------------------------------------------------------------------
@@ -88,18 +93,18 @@ cmd [[ command! P4edit :lua p4.edit()]]
 cmd [[ command! P4revert :lua p4.revert()]]
 cmd [[ command! UEquickfix :lua psue.read_quickfix()]]
 cmd [[ command! Notes :e c:/git/docs/ue/ue.md]]
+cmd [[ command! -nargs=+ -complete=dir -bar Grep lua grep.async_grep(<q-args>)]]
 
 -- Mappings
 -------------------------------------------------------------------------------
 map('n', '<F12>', '<cmd>execute printf(":tag %s", expand("<cword>"))<CR>')
+map('n', '<A-F11>', '<cmd>luafile %<CR><cmd>echo "Reloaded: " . expand("%:p")<CR>')
 map('n', '-', '<cmd>Vexplore<CR>')
 map('n', '<C-F12>', '<cmd>EditConfig<CR>')
 map('n', '<C-s>', '<cmd>w<CR>')
 map('n', '<S-l>', '$')
 map('n', '<S-h>', '0')
 map('n', '<Esc>', '<cmd>noh<CR>')
-map('n', '<C-p>', '<cmd>Files<CR>')
-map('n', '<C-;>', '<cmd>Buffers<CR>')
 map('i', 'jj', '<ESC>')
 map('i', 'jk', '<ESC>')
 map('i', '{', '{}<Left>')
@@ -121,5 +126,25 @@ map('n', '<leader>qf', '<cmd>UEquickfix<CR>')
 map('n', '<A-h>', '<cmd>cfirst<CR>')
 map('n', '<A-j>', '<cmd>cn<CR>')
 map('n', '<A-k>', '<cmd>cp<CR>')
+map('n', '<leader>eo', '<cmd>copen 20<CR>')
+map('n', '<leader>ec', '<cmd>cclose<CR>')
 
+-- FZF
+map('n', '<C-p>', '<cmd>Files<CR>')
+map('n', '<C-;>', '<cmd>Buffers<CR>')
 set_var('fzf_preview_window', '')
+
+-- Folding
+map('n', '<space>', 'za')
+map('n', '<C-space>', 'zR')
+map('n', '<S-space>', 'zM')
+
+-- Grep
+map('n', 'gw', '<cmd>vim <cword> %<CR>:copen<CR>')
+map('n', 'Gw', '<cmd>Grep <cword><CR>')
+
+-- Snippets
+map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
+map('i', '<F9>', "PRAGMA_DISABLE_OPTIMIZATION")
+map('i', '<S-F9>', "PRAGMA_ENABLE_OPTIMIZATION")
+
