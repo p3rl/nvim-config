@@ -1,4 +1,4 @@
-local cmd, fn, g = vim.cmd, vim.fn, vim.g
+local cmd, fn, g, api = vim.cmd, vim.fn, vim.g, vim.api
 
 function _G.dump(...)
     local objects = vim.tbl_map(vim.inspect, {...})
@@ -22,6 +22,21 @@ local function set_var(name, value)
     vim.api.nvim_set_var(name, value)
 end
 
+function nvim_create_augroups(definitions)
+	for group_name, definition in pairs(definitions) do
+		api.nvim_command('augroup '..group_name)
+		api.nvim_command('autocmd!')
+		for _, def in ipairs(definition) do
+			-- if type(def) == 'table' and type(def[#def]) == 'function' then
+			-- 	def[#def] = lua_callback(def[#def])
+			-- end
+			local command = table.concat(vim.tbl_flatten{'autocmd', def}, ' ')
+			api.nvim_command(command)
+		end
+		api.nvim_command('augroup END')
+	end
+end
+
 -- Plugins
 -------------------------------------------------------------------------------
 vim.cmd 'packadd paq-nvim'
@@ -32,10 +47,23 @@ paq {'lifepillar/vim-gruvbox8'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 paq {'arcticicestudio/nord-vim'}
+paq {'itchyny/lightline.vim'}
 
 _G.p4 = require('p4/p4')
 _G.psue = require('psue/psue')
 _G.grep = require('grep/grep')
+
+-- Theme
+-------------------------------------------------------------------------------
+set_var('nord_bold', 1)
+set_var('nord_italic', 1)
+set_var('nord_italic_comments', 1)
+set_var('nord_cursor_line_number_background', 1)
+--cmd 'set background=light'
+
+local colorscheme = 'nord'
+set_var('lightline', { colorscheme = colorscheme  })
+cmd('colorscheme ' .. colorscheme)
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -43,9 +71,6 @@ cmd 'language en'
 cmd 'syntax enable'
 cmd 'filetype on'
 cmd 'set clipboard+=unnamedplus'
-cmd 'colorscheme nord'
---cmd 'set background=light'
-cmd 'noswapfile'
 --cmd 'set listchars=space:_'
 set_var('mapleader', ',')
 
@@ -62,8 +87,14 @@ opt('o', 'smarttab', true)                              -- When on, a <Tab> in f
 opt('b', 'cindent', true)
 cmd 'set listchars=tab::.'                              -- Show tabs
 
+opt('o', 'ignorecase', true)                            --
+opt('o', 'incsearch', true)                             --
+opt('o', 'laststatus', 2)                               --
+opt('o', 'backup', false)                               --
+opt('o', 'swapfile', false)                             --
+opt('o', 'hidden', true)                                --
 opt('w', 'cursorline', true)                            -- Highlight current line
-opt('w', 'list', true)                                  -- Show some invisible characters (tabs...)
+opt('w', 'list', false)                                 -- Show some invisible characters (tabs...)
 opt('w', 'number', true)                                -- Print line number
 opt('w', 'relativenumber', false)                       -- Relative line numbers
 opt('w', 'wrap', false)                                 -- Disable wrapping
@@ -75,7 +106,7 @@ opt('o', 'smartcase', true)                             -- Don't ignore case wit
 opt('o', 'splitbelow', true)                            -- Put new windows below current
 opt('o', 'splitright', true)                            -- Put new windows right of current
 opt('o', 'termguicolors', true)                         -- True color support
-opt('o', 'wildmode', 'list:longest')                    -- Command-line completion mode
+opt('o', 'wildmode', 'full')                            -- Command-line completion mode
 opt('o', 'ttyfast', true)                               -- Should make scrolling faster
 opt('o', 'lazyredraw', true)                            -- Same as above
 opt('o', 'ignorecase', true)                            -- 
@@ -89,22 +120,23 @@ opt('o', 'foldlevel', 99)                              -- Default fold level
 cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
 cmd "command! EditVimConfig :exec printf(':e %s/init.vim', stdpath('config'))"
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
-cmd [[ command! P4edit :lua p4.edit()]]
-cmd [[ command! P4revert :lua p4.revert()]]
-cmd [[ command! UEquickfix :lua psue.read_quickfix()]]
-cmd [[ command! Notes :e c:/git/docs/ue/ue.md]]
-cmd [[ command! -nargs=+ -complete=dir -bar Grep lua grep.async_grep(<q-args>)]]
+cmd [[command! P4edit :lua p4.edit()]]
+cmd [[command! P4revert :lua p4.revert()]]
+cmd [[command! UEquickfix :lua psue.read_quickfix()]]
+cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
+cmd [[command! -nargs=+ -complete=dir -bar Grep lua grep.async_grep(<q-args>)]]
 
 -- Mappings
 -------------------------------------------------------------------------------
 map('n', '<F12>', '<cmd>execute printf(":tag %s", expand("<cword>"))<CR>')
-map('n', '<A-F11>', '<cmd>luafile %<CR><cmd>echo "Reloaded: " . expand("%:p")<CR>')
+map('n', '<A-F11>', [[<cmd>luafile %<CR><cmd>echo '"' . expand("%:p") . '"' . " reloaded"<CR>]])
 map('n', '-', '<cmd>Vexplore<CR>')
 map('n', '<C-F12>', '<cmd>EditConfig<CR>')
 map('n', '<C-s>', '<cmd>w<CR>')
 map('n', '<S-l>', '$')
 map('n', '<S-h>', '0')
 map('n', '<Esc>', '<cmd>noh<CR>')
+map('n', '<C-n>', '<cmd>b#<CR>')
 map('i', 'jj', '<ESC>')
 map('i', 'jk', '<ESC>')
 map('i', '{', '{}<Left>')
@@ -112,8 +144,8 @@ map('i', '[', '[]<Left>')
 
 -- File operations
 map('n', '<leader>fc', '<cmd>CopyPath<CR>')
-map('n', '<leader>fr', '<cmd>:e %<CR>')
-map('n', '<leader>ffr', '<cmd>:e! %<CR>')
+map('n', '<leader>fr', [[<cmd>:e %<CR><cmd>echo printf('"%s" reloaded', expand('%:p'))<CR>]])
+map('n', '<leader>ffr', [[<cmd>:e! %<CR><cmd>echo printf('"%s" force reloaded', expand('%:p'))<CR>]])
 
 -- Perforce operations
 map('n', '<leader>pe', '<cmd>P4edit<CR>')
@@ -139,12 +171,12 @@ map('n', '<space>', 'za')
 map('n', '<C-space>', 'zR')
 map('n', '<S-space>', 'zM')
 
--- Grep
+-- Search & Replace
 map('n', 'gw', '<cmd>vim <cword> %<CR>:copen<CR>')
 map('n', 'Gw', '<cmd>Grep <cword><CR>')
+map('n', 'S', [[:%s/\<<C-R>=expand('<cword>')<CR>\>/<C-R>=expand('<cword>')<CR>/gc<Left><Left>')]])
 
 -- Snippets
 map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
 map('i', '<F9>', "PRAGMA_DISABLE_OPTIMIZATION")
 map('i', '<S-F9>', "PRAGMA_ENABLE_OPTIMIZATION")
-
