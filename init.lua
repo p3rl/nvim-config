@@ -48,6 +48,7 @@ paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 paq {'arcticicestudio/nord-vim'}
 paq {'itchyny/lightline.vim'}
+--paq {'lukas-reineke/indent-blankline.nvim'}
 
 _G.p4 = require('p4/p4')
 _G.psue = require('psue/psue')
@@ -118,6 +119,7 @@ opt('o', 'foldlevel', 99)                              -- Default fold level
 -- Commands
 -------------------------------------------------------------------------------
 cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
+cmd 'command! CopyDir :let @+= expand("%:h") | echo expand("%:h")'
 cmd "command! EditVimConfig :exec printf(':e %s/init.vim', stdpath('config'))"
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
 cmd [[command! P4edit :lua p4.edit()]]
@@ -144,6 +146,7 @@ map('i', '[', '[]<Left>')
 
 -- File operations
 map('n', '<leader>fc', '<cmd>CopyPath<CR>')
+map('n', '<leader>fcd', '<cmd>CopyDir<CR>')
 map('n', '<leader>fr', [[<cmd>:e %<CR><cmd>echo printf('"%s" reloaded', expand('%:p'))<CR>]])
 map('n', '<leader>ffr', [[<cmd>:e! %<CR><cmd>echo printf('"%s" force reloaded', expand('%:p'))<CR>]])
 
@@ -180,3 +183,14 @@ map('n', 'S', [[:%s/\<<C-R>=expand('<cword>')<CR>\>/<C-R>=expand('<cword>')<CR>/
 map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
 map('i', '<F9>', "PRAGMA_DISABLE_OPTIMIZATION")
 map('i', '<S-F9>', "PRAGMA_ENABLE_OPTIMIZATION")
+
+-- Snippets
+map('t', '<Esc>', [[<C-\><C-n>]])
+
+local autocmds = {
+	terminal = {
+		{ 'TermOpen', '*', 'startinsert' }
+	}
+}
+
+nvim_create_augroups(autocmds)
