@@ -48,11 +48,15 @@ paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 paq {'arcticicestudio/nord-vim'}
 paq {'itchyny/lightline.vim'}
+paq {'RishabhRD/popfix'}
 --paq {'lukas-reineke/indent-blankline.nvim'}
 
-_G.p4 = require('p4/p4')
-_G.psue = require('psue/psue')
-_G.grep = require('grep/grep')
+_G.p4 = require('p4')
+_G.psue = require('psue')
+_G.grep = require('grep')
+
+package.loaded['fastbuf'] = nil
+_G.fastbuf = require('fastbuf')
 
 -- Theme
 -------------------------------------------------------------------------------
@@ -65,6 +69,8 @@ set_var('nord_cursor_line_number_background', 1)
 local colorscheme = 'nord'
 set_var('lightline', { colorscheme = colorscheme  })
 cmd('colorscheme ' .. colorscheme)
+
+set_var('fzf_layout', { down = '20%' })
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -127,6 +133,10 @@ cmd [[command! P4revert :lua p4.revert()]]
 cmd [[command! UEquickfix :lua psue.read_quickfix()]]
 cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua grep.async_grep(<q-args>)]]
+cmd [[command! -nargs=0 FbPin lua fastbuf.pin_buffer()]]
+cmd [[command! -nargs=0 FbUnpin  lua fastbuf.unpin_buffer()]]
+cmd [[command! -nargs=0 FbSelectPinned lua fastbuf.select_pinned_buffer()]]
+cmd [[command! -nargs=0 FbTogglePinned lua fastbuf.toggle_pinned()]]
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -149,6 +159,8 @@ map('n', '<leader>fc', '<cmd>CopyPath<CR>')
 map('n', '<leader>fcd', '<cmd>CopyDir<CR>')
 map('n', '<leader>fr', [[<cmd>:e %<CR><cmd>echo printf('"%s" reloaded', expand('%:p'))<CR>]])
 map('n', '<leader>ffr', [[<cmd>:e! %<CR><cmd>echo printf('"%s" force reloaded', expand('%:p'))<CR>]])
+map('n', '<C-Tab>', '<cmd>FbSelectPinned<CR>')
+map('n', '<A-CR>', '<cmd>FbTogglePinned<CR>')
 
 -- Perforce operations
 map('n', '<leader>pe', '<cmd>P4edit<CR>')
@@ -177,7 +189,7 @@ map('n', '<S-space>', 'zM')
 -- Search & Replace
 map('n', 'gw', '<cmd>vim <cword> %<CR>:copen<CR>')
 map('n', 'Gw', '<cmd>Grep <cword><CR>')
-map('n', 'S', [[:%s/\<<C-R>=expand('<cword>')<CR>\>/<C-R>=expand('<cword>')<CR>/gc<Left><Left>')]])
+map('n', 'S', [[:%s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
 
 -- Snippets
 map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
