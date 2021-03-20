@@ -1,41 +1,6 @@
+local utils = require'utils'
+local map, opt, set_var, nvim_create_augroups = utils.map, utils.opt, utils.set_var, utils.create_augroups
 local cmd, fn, g, api = vim.cmd, vim.fn, vim.g, vim.api
-
-function _G.dump(...)
-    local objects = vim.tbl_map(vim.inspect, {...})
-    print(unpack(objects))
-end
-
-local function map(mode, lhs, rhs, opts)
-  local options = {noremap = true}
-  if opts then options = vim.tbl_extend('force', options, opts) end
-  vim.api.nvim_set_keymap(mode, lhs, rhs, options)
-end
-
-local scopes = {o = vim.o, b = vim.bo, w = vim.wo}
-
-local function opt(scope, key, value)
-  scopes[scope][key] = value
-  if scope ~= 'o' then scopes['o'][key] = value end
-end
-
-local function set_var(name, value)
-    vim.api.nvim_set_var(name, value)
-end
-
-function nvim_create_augroups(definitions)
-	for group_name, definition in pairs(definitions) do
-		api.nvim_command('augroup '..group_name)
-		api.nvim_command('autocmd!')
-		for _, def in ipairs(definition) do
-			-- if type(def) == 'table' and type(def[#def]) == 'function' then
-			-- 	def[#def] = lua_callback(def[#def])
-			-- end
-			local command = table.concat(vim.tbl_flatten{'autocmd', def}, ' ')
-			api.nvim_command(command)
-		end
-		api.nvim_command('augroup END')
-	end
-end
 
 -- Plugins
 -------------------------------------------------------------------------------
@@ -43,34 +8,62 @@ vim.cmd 'packadd paq-nvim'
 local paq = require('paq-nvim').paq
 
 paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
+paq {'arcticicestudio/nord-vim'}
 paq {'lifepillar/vim-gruvbox8'}
+paq {'ghifarit53/tokyonight-vim'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
-paq {'arcticicestudio/nord-vim'}
 paq {'itchyny/lightline.vim'}
 paq {'RishabhRD/popfix'}
---paq {'lukas-reineke/indent-blankline.nvim'}
+paq {'neovim/nvim-lspconfig'}
+paq {'nvim-lua/completion-nvim'}
+paq {'hrsh7th/nvim-compe'}
+
+-- Loal plugins
+package.loaded['p4'] = nil
+package.loaded['psue'] = nil
+package.loaded['grep'] = nil
+package.loaded['fastbuf'] = nil
 
 _G.p4 = require('p4')
 _G.psue = require('psue')
 _G.grep = require('grep')
-
-package.loaded['fastbuf'] = nil
 _G.fastbuf = require('fastbuf')
 
 -- Theme
 -------------------------------------------------------------------------------
+local colorscheme = 'nord'
 set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
 set_var('nord_cursor_line_number_background', 1)
+set_var('tokyonight_style', 'storm') -- night, storm
+set_var('tokyonight_enable_italic', 1)
 --cmd 'set background=light'
 
-local colorscheme = 'nord'
-set_var('lightline', { colorscheme = colorscheme  })
 cmd('colorscheme ' .. colorscheme)
-
 set_var('fzf_layout', { down = '20%' })
+
+-- Lightline
+-------------------------------------------------------------------------------
+api.nvim_exec([[
+function! Lightline_filedir()
+    return expand('%:h')
+endfunction
+]], true)
+
+local lightline_config = {
+	colorscheme = colorscheme,
+	active = {
+		left = {
+			{ 'readonly', 'filename', 'modified', 'filedir' }
+		}
+	},
+	component_function = {
+		filedir = 'Lightline_filedir'
+	}
+}
+set_var('lightline', lightline_config)
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -105,7 +98,7 @@ opt('w', 'list', false)                                 -- Show some invisible c
 opt('w', 'number', true)                                -- Print line number
 opt('w', 'relativenumber', false)                       -- Relative line numbers
 opt('w', 'wrap', false)                                 -- Disable wrapping
-opt('o', 'completeopt', 'menuone,noinsert,noselect')    -- Completion options (for deoplete)
+opt('o', 'completeopt', 'menuone,noselect')             -- Completion options (for deoplete)
 opt('o', 'shiftround', true)                            -- Round indent
 opt('o', 'scrolloff', 4 )                               -- Lines of context
 opt('o', 'sidescrolloff', 8)                            -- Columns of context
@@ -120,7 +113,14 @@ opt('o', 'ignorecase', true)                            --
 opt('o', 'smartcase', true)                             -- 
 opt('w', 'foldmethod', 'syntax')                        -- Fold method
 opt('o', 'foldcolumn', '2')                             -- Fold columns
-opt('o', 'foldlevel', 99)                              -- Default fold level
+--opt('o', 'foldlevel', 0)                                -- Default fold level
+opt('o', 'foldlevelstart', 99)                          -- Default fold level
+
+-- Netrw
+set_var('netrw_banner', 0)
+set_var('netrw_browse_split', 4)
+set_var('netrw_liststyle', 3)
+set_var('netrw_winsize', 20)
 
 -- Commands
 -------------------------------------------------------------------------------
@@ -128,15 +128,19 @@ cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
 cmd 'command! CopyDir :let @+= expand("%:h") | echo expand("%:h")'
 cmd "command! EditVimConfig :exec printf(':e %s/init.vim', stdpath('config'))"
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
-cmd [[command! P4edit :lua p4.edit()]]
-cmd [[command! P4revert :lua p4.revert()]]
 cmd [[command! UEquickfix :lua psue.read_quickfix()]]
 cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua grep.async_grep(<q-args>)]]
+-- FastBuf
 cmd [[command! -nargs=0 FbPin lua fastbuf.pin_buffer()]]
 cmd [[command! -nargs=0 FbUnpin  lua fastbuf.unpin_buffer()]]
 cmd [[command! -nargs=0 FbSelectPinned lua fastbuf.select_pinned_buffer()]]
 cmd [[command! -nargs=0 FbTogglePinned lua fastbuf.toggle_pinned()]]
+-- Perforce
+cmd [[command! P4edit :lua p4.edit()]]
+cmd [[command! P4revert :lua p4.revert()]]
+cmd [[command! -nargs=? P4revgraph :lua p4.revision_graph(<q-args>)]]
+cmd [[command! -nargs=? P4timelapse :lua p4.timelapse_view(<q-args>)]]
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -182,7 +186,7 @@ map('n', '<C-;>', '<cmd>Buffers<CR>')
 set_var('fzf_preview_window', '')
 
 -- Folding
-map('n', '<space>', 'za')
+map('n', '<space>', 'zA')
 map('n', '<C-space>', 'zR')
 map('n', '<S-space>', 'zM')
 
@@ -196,8 +200,23 @@ map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
 map('i', '<F9>', "PRAGMA_DISABLE_OPTIMIZATION")
 map('i', '<S-F9>', "PRAGMA_ENABLE_OPTIMIZATION")
 
--- Snippets
-map('t', '<Esc>', [[<C-\><C-n>]])
+-- Window
+map('n', '<A-Up>', '<cmd>resize +2<CR>')
+map('n', '<A-Down>', '<cmd>resize -2<CR>')
+map('n', '<A-Right>', '<cmd>vertical resize +2<CR>')
+map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
+
+-- LSP
+package.loaded['lsp'] = nil
+require'lsp'.setup()
+set_var('completion_matching_strategy_list', {'exact', 'substring', 'fuzzy', 'all'})
+map('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
+map('n', 'gD', '<cmd>:lua vim.lsp.buf.declaration()<CR>')
+cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
+cmd [[command! -nargs=0 LspStop :lua require'Lsp'.stop_all_clients()]]
+
+---- Terminal
+--map('t', '<Esc>', [[<C-\><C-n>]])
 
 local autocmds = {
 	terminal = {
