@@ -8,22 +8,28 @@ vim.cmd 'packadd paq-nvim'
 local paq = require('paq-nvim').paq
 
 paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
+--paq {'nvim-lua/popup.nvim'}
+paq {'nvim-lua/plenary.nvim'}
+--paq {'nvim-lua/completion-nvim'}
+paq {'neovim/nvim-lspconfig'}
 paq {'arcticicestudio/nord-vim'}
 paq {'lifepillar/vim-gruvbox8'}
-paq {'ghifarit53/tokyonight-vim'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
-paq {'itchyny/lightline.vim'}
 paq {'RishabhRD/popfix'}
-paq {'neovim/nvim-lspconfig'}
-paq {'nvim-lua/completion-nvim'}
 paq {'hrsh7th/nvim-compe'}
+paq {'glepnir/galaxyline.nvim', branch = 'main'}
+--paq {'nvim-telescope/telescope.nvim'}
+paq {'kyazdani42/nvim-web-devicons'}
+paq {'kyazdani42/nvim-tree.lua'}
 
--- Loal plugins
+-- Local plugins
 package.loaded['p4'] = nil
 package.loaded['psue'] = nil
 package.loaded['grep'] = nil
 package.loaded['fastbuf'] = nil
+package.loaded['statusline'] = nil
+package.loaded['tree'] = nil
 
 _G.p4 = require('p4')
 _G.psue = require('psue')
@@ -32,38 +38,23 @@ _G.fastbuf = require('fastbuf')
 
 -- Theme
 -------------------------------------------------------------------------------
-local colorscheme = 'nord'
+local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
 set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
 set_var('nord_cursor_line_number_background', 1)
-set_var('tokyonight_style', 'storm') -- night, storm
-set_var('tokyonight_enable_italic', 1)
---cmd 'set background=light'
 
-cmd('colorscheme ' .. colorscheme)
+cmd('colorscheme ' .. theme.colorscheme)
+cmd('set background=' .. theme.background)
 set_var('fzf_layout', { down = '20%' })
 
--- Lightline
+-- Statusline
 -------------------------------------------------------------------------------
-api.nvim_exec([[
-function! Lightline_filedir()
-    return expand('%:h')
-endfunction
-]], true)
+require'statusline'.setup(theme.colorscheme, theme.background)
 
-local lightline_config = {
-	colorscheme = colorscheme,
-	active = {
-		left = {
-			{ 'readonly', 'filename', 'modified', 'filedir' }
-		}
-	},
-	component_function = {
-		filedir = 'Lightline_filedir'
-	}
-}
-set_var('lightline', lightline_config)
+-- Tree
+-------------------------------------------------------------------------------
+require'tree'.setup()
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -113,19 +104,12 @@ opt('o', 'ignorecase', true)                            --
 opt('o', 'smartcase', true)                             -- 
 opt('w', 'foldmethod', 'syntax')                        -- Fold method
 opt('o', 'foldcolumn', '2')                             -- Fold columns
---opt('o', 'foldlevel', 0)                                -- Default fold level
 opt('o', 'foldlevelstart', 99)                          -- Default fold level
-
--- Netrw
-set_var('netrw_banner', 0)
-set_var('netrw_browse_split', 4)
-set_var('netrw_liststyle', 3)
-set_var('netrw_winsize', 20)
 
 -- Commands
 -------------------------------------------------------------------------------
 cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
-cmd 'command! CopyDir :let @+= expand("%:h") | echo expand("%:h")'
+cmd 'command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")'
 cmd "command! EditVimConfig :exec printf(':e %s/init.vim', stdpath('config'))"
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
 cmd [[command! UEquickfix :lua psue.read_quickfix()]]
@@ -137,6 +121,7 @@ cmd [[command! -nargs=0 FbUnpin  lua fastbuf.unpin_buffer()]]
 cmd [[command! -nargs=0 FbSelectPinned lua fastbuf.select_pinned_buffer()]]
 cmd [[command! -nargs=0 FbTogglePinned lua fastbuf.toggle_pinned()]]
 -- Perforce
+cmd [[command! -nargs=* P4init :lua p4.init(<q-args>)]]
 cmd [[command! P4edit :lua p4.edit()]]
 cmd [[command! P4revert :lua p4.revert()]]
 cmd [[command! -nargs=? P4revgraph :lua p4.revision_graph(<q-args>)]]
@@ -146,13 +131,13 @@ cmd [[command! -nargs=? P4timelapse :lua p4.timelapse_view(<q-args>)]]
 -------------------------------------------------------------------------------
 map('n', '<F12>', '<cmd>execute printf(":tag %s", expand("<cword>"))<CR>')
 map('n', '<A-F11>', [[<cmd>luafile %<CR><cmd>echo '"' . expand("%:p") . '"' . " reloaded"<CR>]])
-map('n', '-', '<cmd>Vexplore<CR>')
 map('n', '<C-F12>', '<cmd>EditConfig<CR>')
 map('n', '<C-s>', '<cmd>w<CR>')
 map('n', '<S-l>', '$')
 map('n', '<S-h>', '0')
 map('n', '<Esc>', '<cmd>noh<CR>')
 map('n', '<C-n>', '<cmd>b#<CR>')
+map('n', 'Y', 'y$')
 map('i', 'jj', '<ESC>')
 map('i', 'jk', '<ESC>')
 map('i', '{', '{}<Left>')

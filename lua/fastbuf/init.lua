@@ -7,6 +7,10 @@ local function buf_get_var(buf, name)
 	if status then return value else return nil end
 end
 
+function M.is_buffer_pinned()
+	return buf_get_var(buffer, 'pinned')
+end
+
 function M.pin_buffer()
 	api.nvim_buf_set_var(0, 'pinned', true)
 	print(string.format('"%s" pinned', fn.expand('%:p')))

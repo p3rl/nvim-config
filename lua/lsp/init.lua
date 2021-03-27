@@ -22,7 +22,7 @@ end
 function Lsp.setup()
 	lspconfig.clangd.setup {
 		root_dir = lspconfig.util.root_pattern('compile_commands.json'),
-		cmd = { 'clangd', '--background-index' }
+		cmd = { 'clangd', '--enable-config', '--pch-storage=memory', '--log=verbose', '--background-index' }
 	}
 
 	completion.setup {
@@ -48,6 +48,8 @@ function Lsp.setup()
 			vsnip = true;
 		};
 	}
+
+	vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
 end
 
 return Lsp
