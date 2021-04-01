@@ -123,7 +123,8 @@ function Statusline.setup(colorscheme, background)
 		'fzf',
 		'term',
 		'plug',
-		'netrw'
+		'netrw',
+		'nvimtree'
 	}
 
 	gls.left = {

@@ -12,7 +12,6 @@ paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
 paq {'nvim-lua/plenary.nvim'}
 --paq {'nvim-lua/completion-nvim'}
 paq {'neovim/nvim-lspconfig'}
-paq {'arcticicestudio/nord-vim'}
 paq {'lifepillar/vim-gruvbox8'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
@@ -30,15 +29,13 @@ package.loaded['grep'] = nil
 package.loaded['fastbuf'] = nil
 package.loaded['statusline'] = nil
 package.loaded['tree'] = nil
-
-_G.p4 = require('p4')
-_G.psue = require('psue')
-_G.grep = require('grep')
-_G.fastbuf = require('fastbuf')
+package.loaded['lsp'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
-local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
+--local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
+--local theme = { colorscheme = 'nord', background = 'dark'}
+local theme = { colorscheme = 'onehalfdark', background = 'dark'}
 set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
@@ -47,14 +44,6 @@ set_var('nord_cursor_line_number_background', 1)
 cmd('colorscheme ' .. theme.colorscheme)
 cmd('set background=' .. theme.background)
 set_var('fzf_layout', { down = '20%' })
-
--- Statusline
--------------------------------------------------------------------------------
-require'statusline'.setup(theme.colorscheme, theme.background)
-
--- Tree
--------------------------------------------------------------------------------
-require'tree'.setup()
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -99,11 +88,11 @@ opt('o', 'splitright', true)                            -- Put new windows right
 opt('o', 'termguicolors', true)                         -- True color support
 opt('o', 'wildmode', 'full')                            -- Command-line completion mode
 opt('o', 'ttyfast', true)                               -- Should make scrolling faster
-opt('o', 'lazyredraw', true)                            -- Same as above
+opt('o', 'lazyredraw', false)                            -- Same as above
 opt('o', 'ignorecase', true)                            -- 
 opt('o', 'smartcase', true)                             -- 
 opt('w', 'foldmethod', 'syntax')                        -- Fold method
-opt('o', 'foldcolumn', '2')                             -- Fold columns
+opt('o', 'foldcolumn', '0')                             -- Fold columns
 opt('o', 'foldlevelstart', 99)                          -- Default fold level
 
 -- Commands
@@ -112,20 +101,20 @@ cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
 cmd 'command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")'
 cmd "command! EditVimConfig :exec printf(':e %s/init.vim', stdpath('config'))"
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
-cmd [[command! UEquickfix :lua psue.read_quickfix()]]
+cmd [[command! UEquickfix :lua require'psue'.read_quickfix()]]
 cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
-cmd [[command! -nargs=+ -complete=dir -bar Grep lua grep.async_grep(<q-args>)]]
+cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
 -- FastBuf
-cmd [[command! -nargs=0 FbPin lua fastbuf.pin_buffer()]]
-cmd [[command! -nargs=0 FbUnpin  lua fastbuf.unpin_buffer()]]
-cmd [[command! -nargs=0 FbSelectPinned lua fastbuf.select_pinned_buffer()]]
-cmd [[command! -nargs=0 FbTogglePinned lua fastbuf.toggle_pinned()]]
+cmd [[command! -nargs=0 FbPin lua require'fastbuf'.pin_buffer()]]
+cmd [[command! -nargs=0 FbUnpin  lua require'fastbuf'.unpin_buffer()]]
+cmd [[command! -nargs=0 FbSelectPinned lua require'fastbuf'.select_pinned_buffer()]]
+cmd [[command! -nargs=0 FbTogglePinned lua require'fastbuf'.toggle_pinned()]]
 -- Perforce
-cmd [[command! -nargs=* P4init :lua p4.init(<q-args>)]]
-cmd [[command! P4edit :lua p4.edit()]]
-cmd [[command! P4revert :lua p4.revert()]]
-cmd [[command! -nargs=? P4revgraph :lua p4.revision_graph(<q-args>)]]
-cmd [[command! -nargs=? P4timelapse :lua p4.timelapse_view(<q-args>)]]
+cmd [[command! -nargs=* P4init :lua require'p4'.init(<q-args>)]]
+cmd [[command! P4edit :lua require'p4'.edit()]]
+cmd [[command! P4revert :lua require'p4'.revert()]]
+cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
+cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -191,14 +180,21 @@ map('n', '<A-Down>', '<cmd>resize -2<CR>')
 map('n', '<A-Right>', '<cmd>vertical resize +2<CR>')
 map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
 
+-- Statusline
+-------------------------------------------------------------------------------
+require'statusline'.setup(theme.colorscheme, theme.background)
+
+-- Tree
+-------------------------------------------------------------------------------
+require'tree'.setup()
+
 -- LSP
-package.loaded['lsp'] = nil
 require'lsp'.setup()
 set_var('completion_matching_strategy_list', {'exact', 'substring', 'fuzzy', 'all'})
 map('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
 map('n', 'gD', '<cmd>:lua vim.lsp.buf.declaration()<CR>')
 cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
-cmd [[command! -nargs=0 LspStop :lua require'Lsp'.stop_all_clients()]]
+cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
 
 ---- Terminal
 --map('t', '<Esc>', [[<C-\><C-n>]])
