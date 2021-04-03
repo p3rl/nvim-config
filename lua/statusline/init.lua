@@ -113,7 +113,6 @@ function Statusline.setup(colorscheme, background)
   local theme = themes[colorscheme]
   if theme then
     colors = theme[background] or theme
-    print("applying " .. colorscheme .. " with background " .. background)
   end
 
   Statusline.colorscheme = colorscheme
@@ -124,7 +123,7 @@ function Statusline.setup(colorscheme, background)
     'term',
     'plug',
     'netrw',
-    'nvimtree'
+    'NvimTree'
   }
 
   gls.left = {
