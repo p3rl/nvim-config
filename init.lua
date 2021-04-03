@@ -198,13 +198,28 @@ map('n', 'gD', '<cmd>:lua vim.lsp.buf.declaration()<CR>')
 cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
 cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
 
----- Terminal
---map('t', '<Esc>', [[<C-\><C-n>]])
-
-local autocmds = {
-	terminal = {
-		{ 'TermOpen', '*', 'startinsert' }
-	}
+-- Filetype hooks
+g_filetype_hooks = {
+  lua = function()
+    vim.bo.expandtab = true
+    vim.bo.shiftwidth = 2
+    vim.bo.tabstop = 2
+    vim.bo.softtabstop = 2
+  end
 }
 
+nvim_create_augroups {
+  filetype_hooks = {
+    { 'FileType', 'lua', [[lua g_filetype_hooks.lua()]] }
+  }
+}
+
+--Terminal
+map('t', '<Esc>', [[<C-\><C-n>]])
+
+local autocmds = {
+  terminal = {
+    { 'TermOpen', '*', 'startinsert' }
+  }
+}
 nvim_create_augroups(autocmds)
