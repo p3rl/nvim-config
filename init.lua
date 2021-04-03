@@ -12,9 +12,9 @@ paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
 paq {'nvim-lua/plenary.nvim'}
 --paq {'nvim-lua/completion-nvim'}
 paq {'neovim/nvim-lspconfig'}
-paq {'lifepillar/vim-gruvbox8'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
+paq {'ayu-theme/ayu-vim'}
 paq {'RishabhRD/popfix'}
 paq {'hrsh7th/nvim-compe'}
 paq {'glepnir/galaxyline.nvim', branch = 'main'}
@@ -35,11 +35,13 @@ package.loaded['lsp'] = nil
 -------------------------------------------------------------------------------
 --local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
 --local theme = { colorscheme = 'nord', background = 'dark'}
-local theme = { colorscheme = 'onehalfdark', background = 'dark'}
+--local theme = { colorscheme = 'onehalfdark', background = 'dark'}
+local theme = { colorscheme = 'ayu', background = 'dark'}
 set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
 set_var('nord_cursor_line_number_background', 1)
+set_var('ayucolor', 'mirage')
 
 cmd('colorscheme ' .. theme.colorscheme)
 cmd('set background=' .. theme.background)
