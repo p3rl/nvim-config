@@ -30,13 +30,15 @@ package.loaded['fastbuf'] = nil
 package.loaded['statusline'] = nil
 package.loaded['tree'] = nil
 package.loaded['lsp'] = nil
+package.loaded['nvim-tree'] = nil
+package.loaded['nvim-tree.lib'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
---local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
+local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
 --local theme = { colorscheme = 'nord', background = 'dark'}
 --local theme = { colorscheme = 'onehalfdark', background = 'dark'}
-local theme = { colorscheme = 'ayu', background = 'dark'}
+--local theme = { colorscheme = 'ayu', background = 'dark'}
 set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
@@ -189,6 +191,7 @@ require'statusline'.setup(theme.colorscheme, theme.background)
 -- Tree
 -------------------------------------------------------------------------------
 require'tree'.setup()
+map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 
 -- LSP
 require'lsp'.setup()
@@ -205,12 +208,17 @@ g_filetype_hooks = {
     vim.bo.shiftwidth = 2
     vim.bo.tabstop = 2
     vim.bo.softtabstop = 2
+  end,
+  pwsh = function()
+    vim.bo.expandtab = true
   end
 }
 
 nvim_create_augroups {
   filetype_hooks = {
-    { 'FileType', 'lua', [[lua g_filetype_hooks.lua()]] }
+    { 'FileType', 'lua', [[lua g_filetype_hooks.lua()]] },
+    { 'FileType', 'psm1', [[lua g_filetype_hooks.pwsh()]] },
+    { 'FileType', 'ps1', [[lua g_filetype_hooks.pwsh()]] }
   }
 }
 
