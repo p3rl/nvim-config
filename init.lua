@@ -10,14 +10,13 @@ local paq = require('paq-nvim').paq
 paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
 --paq {'nvim-lua/popup.nvim'}
 paq {'nvim-lua/plenary.nvim'}
---paq {'nvim-lua/completion-nvim'}
 paq {'neovim/nvim-lspconfig'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
-paq {'ayu-theme/ayu-vim'}
+paq {'hoob3rt/lualine.nvim'}
+paq {'folke/tokyonight.nvim'}
 paq {'RishabhRD/popfix'}
 paq {'hrsh7th/nvim-compe'}
-paq {'glepnir/galaxyline.nvim', branch = 'main'}
 --paq {'nvim-telescope/telescope.nvim'}
 paq {'kyazdani42/nvim-web-devicons'}
 paq {'kyazdani42/nvim-tree.lua'}
@@ -28,22 +27,19 @@ package.loaded['psue'] = nil
 package.loaded['grep'] = nil
 package.loaded['fastbuf'] = nil
 package.loaded['statusline'] = nil
-package.loaded['tree'] = nil
 package.loaded['lsp'] = nil
-package.loaded['nvim-tree'] = nil
-package.loaded['nvim-tree.lib'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
-local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
+--local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
 --local theme = { colorscheme = 'nord', background = 'dark'}
---local theme = { colorscheme = 'onehalfdark', background = 'dark'}
---local theme = { colorscheme = 'ayu', background = 'dark'}
+local theme = { colorscheme = 'tokyonight', background = 'dark'}
 set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
 set_var('nord_cursor_line_number_background', 1)
 set_var('ayucolor', 'mirage')
+vim.g.tokyonight_style = "night"
 
 cmd('colorscheme ' .. theme.colorscheme)
 cmd('set background=' .. theme.background)
@@ -55,6 +51,7 @@ cmd 'language en'
 cmd 'syntax enable'
 cmd 'filetype on'
 cmd 'set clipboard+=unnamedplus'
+cmd 'set noswapfile'
 --cmd 'set listchars=space:_'
 set_var('mapleader', ',')
 
@@ -164,7 +161,7 @@ map('n', '<C-;>', '<cmd>Buffers<CR>')
 set_var('fzf_preview_window', '')
 
 -- Folding
-map('n', '<space>', 'zA')
+map('n', '<space>', 'za')
 map('n', '<C-space>', 'zR')
 map('n', '<S-space>', 'zM')
 
@@ -186,11 +183,47 @@ map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
 
 -- Statusline
 -------------------------------------------------------------------------------
-require'statusline'.setup(theme.colorscheme, theme.background)
+require('lualine').setup {
+  options = { 
+    theme = theme.colorscheme,
+    section_separators = {' ', ' '},
+    component_separators = {' ', ' '}
+  },
+  sections = {
+    lualine_a = { 'filename' },
+    lualine_b = {},
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = { 'encoding', 'fileformat', 'filetype' },
+    lualine_z = { 'location'  },
+  },
+  inactive_sections = {
+    lualine_a = {  },
+    lualine_b = {  },
+    lualine_c = { 'filename' },
+    lualine_x = { 'location' },
+    lualine_y = {  },
+    lualine_z = {   }
+  },
+  extensions = { 'fzf' }
+}
 
--- Tree
+-- NvimTree
 -------------------------------------------------------------------------------
-require'tree'.setup()
+set_var('nvim_tree_side', 'left')
+set_var('nvim_tree_width', 60)
+set_var('nvim_tree_ignore', {'.git', 'node_modules', '.cache'})
+set_var('nvim_tree_auto_open', 0) 
+set_var('nvim_tree_auto_close', 0)
+set_var('nvim_tree_quit_on_open', 0)
+set_var('nvim_tree_follow', 1)
+set_var('nvim_tree_indent_markers', 0)
+set_var('nvim_tree_hide_dotfiles', 1)
+set_var('nvim_tree_width_allow_resize', 1)
+set_var('nvim_tree_disable_netrw', 0)
+set_var('nvim_tree_hijack_netrw', 0)
+set_var('nvim_tree_add_trailing', 1)
+set_var('nvim_tree_show_icons', { git = 0, folders = 0, files = 0})
 map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 
 -- LSP
