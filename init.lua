@@ -38,8 +38,7 @@ set_var('nord_bold', 1)
 set_var('nord_italic', 1)
 set_var('nord_italic_comments', 1)
 set_var('nord_cursor_line_number_background', 1)
-set_var('ayucolor', 'mirage')
-vim.g.tokyonight_style = "night"
+vim.g.tokyonight_style = "night" -- storm|night|day
 
 cmd('colorscheme ' .. theme.colorscheme)
 cmd('set background=' .. theme.background)
@@ -100,8 +99,8 @@ opt('o', 'foldlevelstart', 99)                          -- Default fold level
 -------------------------------------------------------------------------------
 cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
 cmd 'command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")'
-cmd "command! EditVimConfig :exec printf(':e %s/init.vim', stdpath('config'))"
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
+cmd "command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))"
 cmd [[command! UEquickfix :lua require'psue'.read_quickfix()]]
 cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
