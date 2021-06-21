@@ -106,7 +106,8 @@ cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
 -- FastBuf
 cmd [[command! -nargs=0 FbPin lua require'fastbuf'.pin_buffer()]]
-cmd [[command! -nargs=0 FbUnpin  lua require'fastbuf'.unpin_buffer()]]
+cmd [[command! -nargs=0 FbUnpin lua require'fastbuf'.unpin_buffer()]]
+cmd [[command! -nargs=0 FbUnpinAll lua require'fastbuf'.unpin_all()]]
 cmd [[command! -nargs=0 FbSelectPinned lua require'fastbuf'.select_pinned_buffer()]]
 cmd [[command! -nargs=0 FbTogglePinned lua require'fastbuf'.toggle_pinned()]]
 -- Perforce

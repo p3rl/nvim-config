@@ -21,6 +21,18 @@ function M.unpin_buffer()
   print(string.format('"%s" unpinned', fn.expand('%:p')))
 end
 
+function M.unpin_all()
+  local buffers = api.nvim_list_bufs()
+
+  for i = 1, #buffers do
+    local buffer = buffers[i] 
+    local is_pinned = buf_get_var(buffer, 'pinned')
+    if is_pinned then
+      api.nvim_buf_set_var(buffer, 'pinned', false)
+    end
+  end
+end
+
 function M.toggle_pinned()
   if buf_get_var(0, 'pinned') then
     M.unpin_buffer()
