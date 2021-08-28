@@ -31,13 +31,7 @@ package.loaded['lsp'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
---local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
---local theme = { colorscheme = 'nord', background = 'dark'}
 local theme = { colorscheme = 'tokyonight', background = 'dark'}
-set_var('nord_bold', 1)
-set_var('nord_italic', 1)
-set_var('nord_italic_comments', 1)
-set_var('nord_cursor_line_number_background', 1)
 vim.g.tokyonight_style = "night" -- storm|night|day
 
 cmd('colorscheme ' .. theme.colorscheme)
@@ -116,6 +110,8 @@ cmd [[command! P4edit :lua require'p4'.edit()]]
 cmd [[command! P4revert :lua require'p4'.revert()]]
 cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
 cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
+-- Perforce
+cmd [[command! -nargs=0 ClangFormat :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
 
 -- Mappings
 -------------------------------------------------------------------------------
