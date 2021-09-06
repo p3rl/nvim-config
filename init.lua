@@ -18,8 +18,9 @@ paq {'folke/tokyonight.nvim'}
 paq {'RishabhRD/popfix'}
 paq {'hrsh7th/nvim-compe'}
 --paq {'nvim-telescope/telescope.nvim'}
-paq {'kyazdani42/nvim-web-devicons'}
+--paq {'kyazdani42/nvim-web-devicons'}
 paq {'kyazdani42/nvim-tree.lua'}
+paq {'rust-lang/rust.vim'}
 
 -- Local plugins
 package.loaded['p4'] = nil
@@ -112,6 +113,8 @@ cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
 cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
 -- Perforce
 cmd [[command! -nargs=0 ClangFormat :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
+-- Clang
+cmd [[command! -nargs=0 ClangFmt :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -136,6 +139,7 @@ map('n', '<leader>fr', [[<cmd>:e %<CR><cmd>echo printf('"%s" reloaded', expand('
 map('n', '<leader>ffr', [[<cmd>:e! %<CR><cmd>echo printf('"%s" force reloaded', expand('%:p'))<CR>]])
 map('n', '<C-Tab>', '<cmd>FbSelectPinned<CR>')
 map('n', '<A-CR>', '<cmd>FbTogglePinned<CR>')
+map('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
 
 -- Perforce operations
 map('n', '<leader>pe', '<cmd>P4edit<CR>')
@@ -181,6 +185,7 @@ map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
 -------------------------------------------------------------------------------
 require('lualine').setup {
   options = { 
+    icons_enabled = false,
     theme = theme.colorscheme,
     section_separators = {' ', ' '},
     component_separators = {' ', ' '}
@@ -190,7 +195,7 @@ require('lualine').setup {
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
-    lualine_y = { 'encoding', 'fileformat', 'filetype' },
+    lualine_y = { require'lsp'.get_buf_client_name, 'encoding', 'fileformat', 'filetype' },
     lualine_z = { 'location'  },
   },
   inactive_sections = {
@@ -201,7 +206,7 @@ require('lualine').setup {
     lualine_y = {  },
     lualine_z = {   }
   },
-  extensions = { 'fzf' }
+  extensions = { 'fzf', 'quickfix', 'nvim-tree' }
 }
 
 -- NvimTree
@@ -240,6 +245,15 @@ g_filetype_hooks = {
   end,
   pwsh = function()
     vim.bo.expandtab = true
+  end,
+  js = function()
+    vim.bo.expandtab = true
+  end,
+  rs = function()
+    vim.bo.expandtab = true
+    vim.bo.shiftwidth = 4
+    vim.bo.tabstop = 4
+    vim.bo.softtabstop = 4
   end
 }
 
@@ -247,7 +261,9 @@ nvim_create_augroups {
   filetype_hooks = {
     { 'FileType', 'lua', [[lua g_filetype_hooks.lua()]] },
     { 'FileType', 'psm1', [[lua g_filetype_hooks.pwsh()]] },
-    { 'FileType', 'ps1', [[lua g_filetype_hooks.pwsh()]] }
+    { 'FileType', 'ps1', [[lua g_filetype_hooks.pwsh()]] },
+    { 'FileType', 'js', [[lua g_filetype_hooks.js()]] },
+    { 'FileType', 'rs', [[lua g_filetype_hooks.rs()]] }
   }
 }
 

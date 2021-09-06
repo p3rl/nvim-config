@@ -11,6 +11,23 @@ function Lsp.get_active_clients()
   return clients
 end
 
+function Lsp.get_buf_clients()
+  local clients = {}  
+  for _,client in ipairs(vim.lsp.buf_get_clients()) do
+    clients[#clients + 1] = { name = client.name, id = client.id }
+  end
+  return clients
+end
+
+function Lsp.get_buf_client_name()
+  local name = '<none>'
+  local clients = Lsp.get_buf_clients()
+  if #clients > 0 then
+    name = clients[1].name
+  end
+  return name
+end
+
 function Lsp.stop_all_clients()
   local clients = Lsp.get_active_clients()
   for _, client in ipairs(clients) do
@@ -21,8 +38,13 @@ end
 
 function Lsp.setup()
   lspconfig.clangd.setup {
-    root_dir = lspconfig.util.root_pattern('compile_commands.json'),
+    root_dir = lspconfig.util.root_pattern('compile_commands.json', '.zenroot', '.p4config'),
     cmd = { 'clangd', '--enable-config', '--pch-storage=memory', '--log=verbose', '--background-index' }
+  }
+
+  lspconfig.rls.setup {
+    root_dir = lspconfig.util.root_pattern('Cargo.toml'),
+    cmd = { 'rls' }
   }
 
   completion.setup {
@@ -49,7 +71,7 @@ function Lsp.setup()
     };
   }
 
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
+  --vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
 end
 
 return Lsp
