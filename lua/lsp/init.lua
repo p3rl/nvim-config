@@ -1,5 +1,5 @@
 local lspconfig = require'lspconfig'
-local completion = require'compe'
+local cmp = require'cmp'
 
 local Lsp = {}
 
@@ -20,12 +20,12 @@ function Lsp.get_buf_clients()
 end
 
 function Lsp.get_buf_client_name()
-  local name = '<none>'
+  local name = 'none'
   local clients = Lsp.get_buf_clients()
   if #clients > 0 then
     name = clients[1].name
   end
-  return name
+  return 'lsp: '..name
 end
 
 function Lsp.stop_all_clients()
@@ -36,9 +36,10 @@ function Lsp.stop_all_clients()
   end
 end
 
-function Lsp.setup()
+function Lsp.setup(opts)
+  
   lspconfig.clangd.setup {
-    root_dir = lspconfig.util.root_pattern('compile_commands.json', '.zenroot', '.p4config'),
+    root_dir = lspconfig.util.root_pattern('compile_commands.json', '.zenroot', '.p4config', '.gitignore'),
     cmd = { 'clangd', '--enable-config', '--pch-storage=memory', '--log=verbose', '--background-index' }
   }
 
@@ -47,31 +48,14 @@ function Lsp.setup()
     cmd = { 'rls' }
   }
 
-  completion.setup {
-    enabled = true;
-    autocomplete = true;
-    debug = false;
-    min_length = 1;
-    preselect = 'enable';
-    throttle_time = 80;
-    source_timeout = 200;
-    incomplete_delay = 400;
-    max_abbr_width = 100;
-    max_kind_width = 100;
-    max_menu_width = 100;
-    documentation = true;
-
-    source = {
-      path = true;
-      buffer = true;
-      calc = true;
-      nvim_lsp = true;
-      nvim_lua = true;
-      vsnip = true;
-    };
+  cmp.setup {
+    sources = {
+      { name = 'buffer' },
+      { name = 'nvim_lsp' },
+      { name = 'nvm_lua' },
+    }
   }
 
-  --vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
 end
 
 return Lsp

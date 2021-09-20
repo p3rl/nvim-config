@@ -180,9 +180,11 @@ endif
 
 " Unreal types
 syn keyword	ueType uint8 uint16 uint32 uint64 int8 int16 int32 int64
+syn keyword	ueTypeShort u8 u16 u32 u64 i8 i16 i32 i64 f32 f64
 syn keyword	ueMacro check ensure ensuref checkf UE_LOG UE_CLOG TRACE_CPUPROFILER_EVENT_SCOPE TEXT
 
 hi def link ueType Type
+hi def link ueTypeShort Type
 hi def link ueMacro Typedef
 
 " Default highlighting

@@ -16,7 +16,10 @@ paq {'junegunn/fzf.vim'}
 paq {'hoob3rt/lualine.nvim'}
 paq {'folke/tokyonight.nvim'}
 paq {'RishabhRD/popfix'}
-paq {'hrsh7th/nvim-compe'}
+--paq {'hrsh7th/nvim-compe'}
+paq {'hrsh7th/nvim-cmp'}
+paq {'hrsh7th/cmp-buffer'}
+paq {'hrsh7th/cmp-nvim-lsp'}
 --paq {'nvim-telescope/telescope.nvim'}
 --paq {'kyazdani42/nvim-web-devicons'}
 paq {'kyazdani42/nvim-tree.lua'}
