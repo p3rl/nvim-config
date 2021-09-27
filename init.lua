@@ -76,7 +76,7 @@ opt('w', 'list', false)                                 -- Show some invisible c
 opt('w', 'number', true)                                -- Print line number
 opt('w', 'relativenumber', false)                       -- Relative line numbers
 opt('w', 'wrap', false)                                 -- Disable wrapping
-opt('o', 'completeopt', 'menuone,noselect')             -- Completion options (for deoplete)
+opt('o', 'completeopt', 'menu,menuone,noselect')       -- Completion options (for deoplete)
 opt('o', 'shiftround', true)                            -- Round indent
 opt('o', 'scrolloff', 4 )                               -- Lines of context
 opt('o', 'sidescrolloff', 8)                            -- Columns of context
@@ -214,20 +214,35 @@ require('lualine').setup {
 
 -- NvimTree
 -------------------------------------------------------------------------------
-set_var('nvim_tree_side', 'left')
-set_var('nvim_tree_width', 60)
 set_var('nvim_tree_ignore', {'.git', 'node_modules', '.cache'})
-set_var('nvim_tree_auto_open', 0) 
-set_var('nvim_tree_auto_close', 0)
-set_var('nvim_tree_quit_on_open', 0)
-set_var('nvim_tree_follow', 1)
-set_var('nvim_tree_indent_markers', 0)
-set_var('nvim_tree_hide_dotfiles', 1)
-set_var('nvim_tree_width_allow_resize', 1)
-set_var('nvim_tree_disable_netrw', 0)
-set_var('nvim_tree_hijack_netrw', 0)
-set_var('nvim_tree_add_trailing', 1)
 set_var('nvim_tree_show_icons', { git = 0, folders = 0, files = 0})
+
+require'nvim-tree'.setup {
+  disable_netrw       = true,
+  hijack_netrw        = true,
+  open_on_setup       = false,
+  ignore_ft_on_setup  = {},
+  auto_close          = false,
+  open_on_tab         = false,
+  hijack_cursor       = false,
+  update_cwd          = false,
+  lsp_diagnostics     = false,
+  update_focused_file = {
+    enable      = false,
+    update_cwd  = false,
+    ignore_list = {}
+  },
+  view = {
+    width = 30,
+    side = 'left',
+    auto_resize = false,
+    mappings = {
+      custom_only = false,
+      list = {}
+    }
+  }
+}
+
 map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 
 -- LSP
