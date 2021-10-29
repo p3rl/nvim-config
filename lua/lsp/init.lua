@@ -39,19 +39,19 @@ end
 function Lsp.setup(opts)
   
   cmp.setup {
-    completion = {
-      autocomplete = true
-    },
-    sources = {
-      { name = 'nvm_lua' },
+    sources = cmp.config.sources({
       { name = 'buffer' },
       { name = 'nvim_lsp' }
+    }),
+    experimental = {
+      native_menu = false,
+      ghost_text = true
     }
   }
   
   lspconfig.clangd.setup {
     root_dir = lspconfig.util.root_pattern('compile_commands.json', '.zenroot', '.p4config', '.gitignore'),
-    cmd = { 'clangd', '--enable-config', '--pch-storage=memory', '--log=verbose', '--background-index' },
+    cmd = { 'clangd', '--background-index' },
     capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
   }
 
@@ -60,7 +60,7 @@ function Lsp.setup(opts)
     cmd = { 'rls' }
   }
 
-  --vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
+  vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
 
 end
 

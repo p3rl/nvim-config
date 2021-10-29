@@ -15,11 +15,11 @@ paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 paq {'hoob3rt/lualine.nvim'}
 paq {'folke/tokyonight.nvim'}
+paq {'morhetz/gruvbox'}
 paq {'RishabhRD/popfix'}
---paq {'hrsh7th/nvim-compe'}
-paq {'hrsh7th/nvim-cmp'}
-paq {'hrsh7th/cmp-buffer'}
 paq {'hrsh7th/cmp-nvim-lsp'}
+paq {'hrsh7th/cmp-buffer'}
+paq {'hrsh7th/nvim-cmp'}
 --paq {'nvim-telescope/telescope.nvim'}
 --paq {'kyazdani42/nvim-web-devicons'}
 paq {'kyazdani42/nvim-tree.lua'}
@@ -35,6 +35,7 @@ package.loaded['lsp'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
+--local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
 local theme = { colorscheme = 'tokyonight', background = 'dark'}
 vim.g.tokyonight_style = "night" -- storm|night|day
 
@@ -76,7 +77,7 @@ opt('w', 'list', false)                                 -- Show some invisible c
 opt('w', 'number', true)                                -- Print line number
 opt('w', 'relativenumber', false)                       -- Relative line numbers
 opt('w', 'wrap', false)                                 -- Disable wrapping
-opt('o', 'completeopt', 'menu,menuone,noselect')       -- Completion options (for deoplete)
+opt('o', 'completeopt', 'menuone,noselect')             -- Completion options (for deoplete)
 opt('o', 'shiftround', true)                            -- Round indent
 opt('o', 'scrolloff', 4 )                               -- Lines of context
 opt('o', 'sidescrolloff', 8)                            -- Columns of context
@@ -184,6 +185,8 @@ map('n', '<A-Down>', '<cmd>resize -2<CR>')
 map('n', '<A-Right>', '<cmd>vertical resize +2<CR>')
 map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
 
+map('n', 'tf', [[<cmd>lua require('telescope.builtin').find_files()<cr>]])
+
 -- Statusline
 -------------------------------------------------------------------------------
 require('lualine').setup {
@@ -218,8 +221,8 @@ set_var('nvim_tree_ignore', {'.git', 'node_modules', '.cache'})
 set_var('nvim_tree_show_icons', { git = 0, folders = 0, files = 0})
 
 require'nvim-tree'.setup {
-  disable_netrw       = true,
-  hijack_netrw        = true,
+  disable_netrw       = false,
+  hijack_netrw        = false,
   open_on_setup       = false,
   ignore_ft_on_setup  = {},
   auto_close          = false,
@@ -228,12 +231,12 @@ require'nvim-tree'.setup {
   update_cwd          = false,
   lsp_diagnostics     = false,
   update_focused_file = {
-    enable      = false,
+    enable      = true,
     update_cwd  = false,
     ignore_list = {}
   },
   view = {
-    width = 30,
+    width = 50,
     side = 'left',
     auto_resize = false,
     mappings = {
