@@ -32,6 +32,7 @@ package.loaded['grep'] = nil
 package.loaded['fastbuf'] = nil
 package.loaded['statusline'] = nil
 package.loaded['lsp'] = nil
+package.loaded['notes'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
@@ -101,7 +102,8 @@ cmd 'command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")'
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
 cmd "command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))"
 cmd [[command! UEquickfix :lua require'psue'.read_quickfix()]]
-cmd [[command! Notes :e c:/git/docs/ue/ue.md]]
+cmd [[command! Notes lua require'notes'.open()]]
+cmd [[command! SaveNotes lua require'notes'.save()]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
 -- FastBuf
 cmd [[command! -nargs=0 FbPin lua require'fastbuf'.pin_buffer()]]
