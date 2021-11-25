@@ -41,12 +41,16 @@ function Lsp.setup(opts)
   cmp.setup {
     sources = cmp.config.sources({
       { name = 'buffer' },
+      { name = 'nvim_lua' },
       { name = 'nvim_lsp' }
     }),
     experimental = {
       native_menu = false,
       ghost_text = true
-    }
+    },
+    completion = {
+		keyword_length = 2
+	}
   }
   
   lspconfig.clangd.setup {

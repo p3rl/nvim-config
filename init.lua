@@ -35,8 +35,8 @@ package.loaded['lsp'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
---local theme = { colorscheme = 'gruvbox8_hard', background = 'light'}
-local theme = { colorscheme = 'tokyonight', background = 'dark'}
+--local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
+local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
 vim.g.tokyonight_style = "night" -- storm|night|day
 
 cmd('colorscheme ' .. theme.colorscheme)
@@ -192,7 +192,7 @@ map('n', 'tf', [[<cmd>lua require('telescope.builtin').find_files()<cr>]])
 require('lualine').setup {
   options = { 
     icons_enabled = false,
-    theme = theme.colorscheme,
+    theme = theme.lualine_theme,
     section_separators = {' ', ' '},
     component_separators = {' ', ' '}
   },
@@ -229,7 +229,6 @@ require'nvim-tree'.setup {
   open_on_tab         = false,
   hijack_cursor       = false,
   update_cwd          = false,
-  lsp_diagnostics     = false,
   update_focused_file = {
     enable      = true,
     update_cwd  = false,
