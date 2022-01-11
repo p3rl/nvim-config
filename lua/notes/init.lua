@@ -11,4 +11,8 @@ function Notes.save()
   print(vim.fn.system('git ' .. string.format("-C %s push", notes_repo)))
 end
 
+function Notes.update()
+  print(vim.fn.system('git ' .. string.format("-C %s pull", notes_repo)))
+end
+
 return Notes

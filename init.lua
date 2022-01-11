@@ -4,8 +4,8 @@ local cmd, fn, g, api = vim.cmd, vim.fn, vim.g, vim.api
 
 -- Plugins
 -------------------------------------------------------------------------------
-vim.cmd 'packadd paq-nvim'
-local paq = require('paq-nvim').paq
+--vim.cmd 'packadd paq-nvim'
+local paq = require('paq').paq
 
 paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
 --paq {'nvim-lua/popup.nvim'}
@@ -55,12 +55,22 @@ cmd 'set noswapfile'
 set_var('mapleader', ',')
 
 -- Tabs
-local indent = 4
-local spaces_instead_of_tabs = false
-opt('b', 'shiftwidth', indent)                          -- Size of indent
-opt('b', 'tabstop', indent)                             -- Number of spaces tabs count for
-opt('b', 'softtabstop', indent)                         -- Number of spaces that a <Tab> counts for while performing editingoperations, like inserting a <Tab> or using <BS>
-opt('o', 'expandtab', spaces_instead_of_tabs)           -- Spaces instead of tabs
+
+local tabs = {
+  general = {
+    indent = 4,
+    spaces = false
+  },
+  lua = {
+    indent = 4,
+    spaces = true
+  }
+}
+
+opt('b', 'shiftwidth', tabs.general.indent)             -- Size of indent
+opt('b', 'tabstop', tabs.general.indent)                -- Number of spaces tabs count for
+opt('b', 'softtabstop', tabs.general.indent)            -- Number of spaces that a <Tab> counts for while performing editingoperations, like inserting a <Tab> or using <BS>
+opt('o', 'expandtab', tabs.general.spaces)              -- Spaces instead of tabs
 opt('b', 'autoindent', true)                            -- Copy indent from current line when starting a new line
 opt('b', 'smartindent', true)                           -- Do smart autoindenting when starting a new line
 opt('o', 'smarttab', true)                              -- When on, a <Tab> in front of a line inserts blanks according to
@@ -104,6 +114,7 @@ cmd "command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))"
 cmd [[command! UEquickfix :lua require'psue'.read_quickfix()]]
 cmd [[command! Notes lua require'notes'.open()]]
 cmd [[command! SaveNotes lua require'notes'.save()]]
+cmd [[command! UpdateNotes lua require'notes'.update()]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
 -- FastBuf
 cmd [[command! -nargs=0 FbPin lua require'fastbuf'.pin_buffer()]]
@@ -260,10 +271,10 @@ cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
 -- Filetype hooks
 g_filetype_hooks = {
   lua = function()
-    vim.bo.expandtab = true
-    vim.bo.shiftwidth = 2
-    vim.bo.tabstop = 2
-    vim.bo.softtabstop = 2
+    vim.bo.expandtab = tabs.lua.spaces
+    vim.bo.shiftwidth = tabs.lua.indent
+    vim.bo.tabstop = tabs.lua.indent
+    vim.bo.softtabstop = tabs.lua.indent
   end,
   pwsh = function()
     vim.bo.expandtab = true
@@ -298,3 +309,12 @@ local autocmds = {
   }
 }
 nvim_create_augroups(autocmds)
+
+if vim.g.nvui then
+  cmd [[set guifont=JetBrains\ Mono:h9]]
+  cmd [[NvuiCmdFontFamily Jetbrains Mono]]
+  cmd [[NvuiCursorAnimationDuration 0]]
+  cmd [[NvuiMoveAnimationDuration 0.1]]
+  cmd [[NvuiScrollAnimationDuration 0.1]]
+  cmd [[NvuiFrameless 1]]
+end
