@@ -20,6 +20,7 @@ paq {'RishabhRD/popfix'}
 paq {'hrsh7th/cmp-nvim-lsp'}
 paq {'hrsh7th/cmp-buffer'}
 paq {'hrsh7th/nvim-cmp'}
+paq {'tpope/vim-fugitive'}
 --paq {'nvim-telescope/telescope.nvim'}
 --paq {'kyazdani42/nvim-web-devicons'}
 paq {'kyazdani42/nvim-tree.lua'}
