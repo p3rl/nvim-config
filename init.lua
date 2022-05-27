@@ -17,9 +17,10 @@ paq {'hoob3rt/lualine.nvim'}
 paq {'folke/tokyonight.nvim'}
 paq {'morhetz/gruvbox'}
 paq {'RishabhRD/popfix'}
-paq {'hrsh7th/cmp-nvim-lsp'}
-paq {'hrsh7th/cmp-buffer'}
 paq {'hrsh7th/nvim-cmp'}
+paq {'hrsh7th/cmp-buffer'}
+paq {'hrsh7th/cmp-nvim-lua'}
+paq {'hrsh7th/cmp-nvim-lsp'}
 paq {'tpope/vim-fugitive'}
 --paq {'nvim-telescope/telescope.nvim'}
 --paq {'kyazdani42/nvim-web-devicons'}
@@ -63,7 +64,7 @@ local tabs = {
     spaces = false
   },
   lua = {
-    indent = 4,
+    indent = 2,
     spaces = true
   }
 }
@@ -231,7 +232,6 @@ require('lualine').setup {
 
 -- NvimTree
 -------------------------------------------------------------------------------
-set_var('nvim_tree_ignore', {'.git', 'node_modules', '.cache'})
 set_var('nvim_tree_show_icons', { git = 0, folders = 0, files = 0})
 
 require'nvim-tree'.setup {
@@ -239,7 +239,6 @@ require'nvim-tree'.setup {
   hijack_netrw        = false,
   open_on_setup       = false,
   ignore_ft_on_setup  = {},
-  auto_close          = false,
   open_on_tab         = false,
   hijack_cursor       = false,
   update_cwd          = false,
@@ -256,12 +255,14 @@ require'nvim-tree'.setup {
       custom_only = false,
       list = {}
     }
-  }
+  },
+  nvim_tree_ignore = {'.git', 'node_modules', '.cache'}
 }
 
 map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 
 -- LSP
+-------------------------------------------------------------------------------
 require'lsp'.setup()
 set_var('completion_matching_strategy_list', {'exact', 'substring', 'fuzzy', 'all'})
 map('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')

@@ -40,23 +40,54 @@ function Lsp.setup(opts)
   
   cmp.setup {
     sources = cmp.config.sources({
-      { name = 'buffer' },
-      { name = 'nvim_lua' },
-      { name = 'nvim_lsp' }
+      { name = 'nvim_lsp' },
+      { name = 'nvim_lua' }
+    }, {
+      { name = 'buffer', keyword_length = 3 }
     }),
     experimental = {
       native_menu = false,
       ghost_text = true
     },
     completion = {
-		keyword_length = 2
-	}
+		  keyword_length = 2
+	  },
+    enabled = function()
+      if vim.bo.filetype == 'markdown' then
+        return false
+      else
+        return true
+      end
+    end
   }
+
+  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+
+  local lsp_attach = function(client, buf)
+    -- Example maps, set your own with vim.api.nvim_buf_set_keymap(buf, "n", <lhs>, <rhs>, { desc = <desc> })
+    -- or a plugin like which-key.nvim
+    -- <lhs>        <rhs>                        <desc>
+    -- "K"          vim.lsp.buf.hover            "Hover Info"
+    -- "<leader>qf" vim.diagnostic.setqflist     "Quickfix Diagnostics"
+    -- "[d"         vim.diagnostic.goto_prev     "Previous Diagnostic"
+    -- "]d"         vim.diagnostic.goto_next     "Next Diagnostic"
+    -- "<leader>e"  vim.diagnostic.open_float    "Explain Diagnostic"
+    -- "<leader>ca" vim.lsp.buf.code_action      "Code Action"
+    -- "<leader>cr" vim.lsp.buf.rename           "Rename Symbol"
+    -- "<leader>fs" vim.lsp.buf.document_symbol  "Document Symbols"
+    -- "<leader>fS" vim.lsp.buf.workspace_symbol "Workspace Symbols"
+    -- "<leader>gq" vim.lsp.buf.formatting_sync  "Format File"
+
+    vim.api.nvim_buf_set_option(buf, "formatexpr", "v:lua.vim.lsp.formatexpr()")
+    vim.api.nvim_buf_set_option(buf, "omnifunc", "v:lua.vim.lsp.omnifunc")
+    vim.api.nvim_buf_set_option(buf, "tagfunc", "v:lua.vim.lsp.tagfunc")
+  end
   
   lspconfig.clangd.setup {
     root_dir = lspconfig.util.root_pattern('compile_commands.json', '.zenroot', '.p4config', '.gitignore'),
     cmd = { 'clangd', '--background-index' },
-    capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+    capabilities = capabilities,
+    on_attach = lsp_attach
   }
 
   lspconfig.rls.setup {
