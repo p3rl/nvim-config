@@ -38,8 +38,8 @@ package.loaded['notes'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
---local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
-local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
+local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
+--local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
 vim.g.tokyonight_style = "night" -- storm|night|day
 
 cmd('colorscheme ' .. theme.colorscheme)
@@ -130,6 +130,7 @@ cmd [[command! P4edit :lua require'p4'.edit()]]
 cmd [[command! P4revert :lua require'p4'.revert()]]
 cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
 cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
+cmd [[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]]
 -- Perforce
 cmd [[command! -nargs=0 ClangFormat :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
 -- Clang
