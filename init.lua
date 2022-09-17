@@ -14,13 +14,18 @@ paq {'neovim/nvim-lspconfig'}
 paq {'junegunn/fzf', hook = fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 paq {'hoob3rt/lualine.nvim'}
-paq {'folke/tokyonight.nvim'}
-paq {'morhetz/gruvbox'}
 paq {'RishabhRD/popfix'}
+
+paq {'folke/tokyonight.nvim'}
+
 paq {'hrsh7th/nvim-cmp'}
 paq {'hrsh7th/cmp-buffer'}
 paq {'hrsh7th/cmp-nvim-lua'}
 paq {'hrsh7th/cmp-nvim-lsp'}
+paq {'hrsh7th/cmp-path'}
+paq {'hrsh7th/cmp-cmdline'}
+paq {'delphinus/cmp-ctags'}
+
 paq {'tpope/vim-fugitive'}
 --paq {'nvim-telescope/telescope.nvim'}
 --paq {'kyazdani42/nvim-web-devicons'}
@@ -57,7 +62,7 @@ cmd 'set noswapfile'
 set_var('mapleader', ',')
 
 -- Tabs
-
+-------------------------------------------------------------------------------
 local tabs = {
   general = {
     indent = 4,
@@ -68,7 +73,8 @@ local tabs = {
     spaces = true
   }
 }
-
+-- Settings
+-------------------------------------------------------------------------------
 opt('b', 'shiftwidth', tabs.general.indent)             -- Size of indent
 opt('b', 'tabstop', tabs.general.indent)                -- Number of spaces tabs count for
 opt('b', 'softtabstop', tabs.general.indent)            -- Number of spaces that a <Tab> counts for while performing editingoperations, like inserting a <Tab> or using <BS>
@@ -236,7 +242,7 @@ require('lualine').setup {
 set_var('nvim_tree_show_icons', { git = 0, folders = 0, files = 0})
 
 require'nvim-tree'.setup {
-  disable_netrw       = false,
+  disable_netrw       = true,
   hijack_netrw        = false,
   open_on_setup       = false,
   ignore_ft_on_setup  = {},
@@ -251,13 +257,11 @@ require'nvim-tree'.setup {
   view = {
     width = 50,
     side = 'left',
-    auto_resize = false,
     mappings = {
       custom_only = false,
       list = {}
     }
-  },
-  nvim_tree_ignore = {'.git', 'node_modules', '.cache'}
+  }
 }
 
 map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
@@ -265,13 +269,14 @@ map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 -- LSP
 -------------------------------------------------------------------------------
 require'lsp'.setup()
-set_var('completion_matching_strategy_list', {'exact', 'substring', 'fuzzy', 'all'})
-map('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
-map('n', 'gD', '<cmd>:lua vim.lsp.buf.declaration()<CR>')
+--set_var('completion_matching_strategy_list', {'exact', 'substring', 'fuzzy', 'all'})
+--map('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
+--map('n', 'gD', '<cmd>:lua vim.lsp.buf.declaration()<CR>')
 cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
 cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
 
 -- Filetype hooks
+-------------------------------------------------------------------------------
 g_filetype_hooks = {
   lua = function()
     vim.bo.expandtab = tabs.lua.spaces
@@ -304,6 +309,7 @@ nvim_create_augroups {
 }
 
 --Terminal
+-------------------------------------------------------------------------------
 map('t', '<Esc>', [[<C-\><C-n>]])
 
 local autocmds = {
