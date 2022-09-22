@@ -43,8 +43,8 @@ package.loaded['notes'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
-local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
---local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
+--local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
+local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
 vim.g.tokyonight_style = "night" -- storm|night|day
 
 cmd('colorscheme ' .. theme.colorscheme)

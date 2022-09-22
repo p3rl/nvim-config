@@ -50,7 +50,14 @@ function Lsp.setup(opts)
       { name = 'cmp_ctags' },
       }, {
         { name = 'buffer' },
-      })
+      }),
+    enabled = function()
+      if vim.bo.filetype == 'markdown' then
+        return false
+      else
+        return true
+      end
+    end
   }
   cmp.setup.cmdline('/', {
     mapping = cmp.mapping.preset.cmdline(),
@@ -75,6 +82,8 @@ function Lsp.setup(opts)
     cmd = { 'clangd', '--background-index' },
     capabilities = capabilities
   }
+
+  vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
 end
 
 --function Lsp.setup(opts)
