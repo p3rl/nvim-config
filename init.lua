@@ -43,8 +43,21 @@ package.loaded['notes'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
+
+if vim.fn.exists('g:neovide') then
+  cmd [[set guifont=JetBrains\ Mono:h9]]
+  cmd [[let g:neovide_scroll_animation_length = 0.3]]
+  cmd [[let g:neovide_cursor_animation_length=0.03]]
+
+end
+
 --local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
 local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
+
+if vim.fn.exists('g:GuiLoaded') == 0 then
+  theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
+end
+
 vim.g.tokyonight_style = "night" -- storm|night|day
 
 cmd('colorscheme ' .. theme.colorscheme)
@@ -87,7 +100,7 @@ cmd 'set listchars=tab::.'                              -- Show tabs
 
 opt('o', 'ignorecase', true)                            --
 opt('o', 'incsearch', true)                             --
-opt('o', 'laststatus', 2)                               --
+opt('o', 'laststatus', 3)                               --
 opt('o', 'backup', false)                               --
 opt('o', 'swapfile', false)                             --
 opt('o', 'hidden', true)                                --
@@ -141,6 +154,8 @@ cmd [[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]]
 cmd [[command! -nargs=0 ClangFormat :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
 -- Clang
 cmd [[command! -nargs=0 ClangFmt :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
+-- pwsh
+cmd "command! EditPowerShellProfile :exec printf(':e C:\\Users\\per.larsson\\OneDrive\\Dokument\\PowerShell\\Microsoft.PowerShell_profile.ps1')"
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -164,7 +179,9 @@ map('n', '<leader>fcd', '<cmd>CopyDir<CR>')
 map('n', '<leader>fr', [[<cmd>:e %<CR><cmd>echo printf('"%s" reloaded', expand('%:p'))<CR>]])
 map('n', '<leader>ffr', [[<cmd>:e! %<CR><cmd>echo printf('"%s" force reloaded', expand('%:p'))<CR>]])
 map('n', '<C-Tab>', '<cmd>FbSelectPinned<CR>')
+map('n', '<leader>sp', '<cmd>FbSelectPinned<CR>')
 map('n', '<A-CR>', '<cmd>FbTogglePinned<CR>')
+map('n', '<leader>fp', '<cmd>FbTogglePinned<CR>')
 map('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
 
 -- Perforce operations
@@ -184,7 +201,8 @@ map('n', '<leader>ec', '<cmd>cclose<CR>')
 -- FZF
 map('n', '<C-p>', '<cmd>Files<CR>')
 map('n', '<C-;>', '<cmd>Buffers<CR>')
-set_var('fzf_preview_window', '')
+map('n', '<leader>p', '<cmd>Buffers<CR>')
+--set_var('fzf_preview_window', '')
 
 -- Folding
 map('n', '<space>', 'za')
@@ -239,8 +257,6 @@ require('lualine').setup {
 
 -- NvimTree
 -------------------------------------------------------------------------------
-set_var('nvim_tree_show_icons', { git = 0, folders = 0, files = 0})
-
 require'nvim-tree'.setup {
   disable_netrw       = true,
   hijack_netrw        = false,
@@ -318,12 +334,3 @@ local autocmds = {
   }
 }
 nvim_create_augroups(autocmds)
-
-if vim.g.nvui then
-  cmd [[set guifont=JetBrains\ Mono:h9]]
-  cmd [[NvuiCmdFontFamily Jetbrains Mono]]
-  cmd [[NvuiCursorAnimationDuration 0]]
-  cmd [[NvuiMoveAnimationDuration 0.1]]
-  cmd [[NvuiScrollAnimationDuration 0.1]]
-  cmd [[NvuiFrameless 1]]
-end
