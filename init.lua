@@ -4,64 +4,44 @@ local cmd, fn, g, api = vim.cmd, vim.fn, vim.g, vim.api
 
 -- Plugins
 -------------------------------------------------------------------------------
---vim.cmd 'packadd paq-nvim'
-local paq = require('paq').paq
-
-paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
---paq {'nvim-lua/popup.nvim'}
-paq {'nvim-lua/plenary.nvim'}
-paq {'neovim/nvim-lspconfig'}
-paq {'junegunn/fzf', hook = fn['fzf#install']}
-paq {'junegunn/fzf.vim'}
-paq {'hoob3rt/lualine.nvim'}
-paq {'RishabhRD/popfix'}
-
-paq {'folke/tokyonight.nvim'}
-
-paq {'hrsh7th/nvim-cmp'}
-paq {'hrsh7th/cmp-buffer'}
-paq {'hrsh7th/cmp-nvim-lua'}
-paq {'hrsh7th/cmp-nvim-lsp'}
-paq {'hrsh7th/cmp-path'}
-paq {'hrsh7th/cmp-cmdline'}
-paq {'delphinus/cmp-ctags'}
-
-paq {'tpope/vim-fugitive'}
---paq {'nvim-telescope/telescope.nvim'}
---paq {'kyazdani42/nvim-web-devicons'}
-paq {'kyazdani42/nvim-tree.lua'}
-paq {'rust-lang/rust.vim'}
+require "paq" {
+  'savq/paq-nvim';
+  'nvim-lua/popup.nvim';
+  'nvim-lua/plenary.nvim';
+  'neovim/nvim-lspconfig';
+  'vijaymarupudi/nvim-fzf';
+  'hoob3rt/lualine.nvim';
+  'RishabhRD/popfix';
+  {'folke/tokyonight.nvim', branch = 'main'};
+  'hrsh7th/nvim-cmp';
+  'hrsh7th/cmp-buffer';
+  'hrsh7th/cmp-nvim-lua';
+  'hrsh7th/cmp-nvim-lsp';
+  'hrsh7th/cmp-path';
+  'hrsh7th/cmp-cmdline';
+  'delphinus/cmp-ctags';
+  'tpope/vim-fugitive';
+  'kyazdani42/nvim-tree.lua';
+  'rust-lang/rust.vim';
+}
 
 -- Local plugins
+package.loaded['fzf-cmds'] = nil
 package.loaded['p4'] = nil
 package.loaded['psue'] = nil
 package.loaded['grep'] = nil
 package.loaded['fastbuf'] = nil
-package.loaded['statusline'] = nil
 package.loaded['lsp'] = nil
 package.loaded['notes'] = nil
 
 -- Theme
 -------------------------------------------------------------------------------
-
-if vim.fn.exists('g:neovide') then
-  cmd [[set guifont=JetBrains\ Mono:h9]]
-  cmd [[let g:neovide_scroll_animation_length = 0.3]]
-  cmd [[let g:neovide_cursor_animation_length=0.03]]
-
-end
-
 --local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
-local theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
+local theme = { colorscheme = 'tokyonight-night', background = 'dark', lualine_theme = 'tokyonight'}
 
-if vim.fn.exists('g:GuiLoaded') == 0 then
-  theme = { colorscheme = 'tokyonight', background = 'dark', lualine_theme = 'tokyonight'}
-end
-
-vim.g.tokyonight_style = "night" -- storm|night|day
-
-cmd('colorscheme ' .. theme.colorscheme)
+cmd('set termguicolors')
 cmd('set background=' .. theme.background)
+cmd('colorscheme ' .. theme.colorscheme)
 set_var('fzf_layout', { down = '20%' })
 
 -- Settings
@@ -84,8 +64,39 @@ local tabs = {
   lua = {
     indent = 2,
     spaces = true
+  },
+  ps1 = {
+    indent = 4,
+    spaces = true
+  },
+  psm1 = {
+    indent = 4,
+    spaces = true
+  },
+  psd1 = {
+    indent = 4,
+    spaces = true
+  },
+  rs = {
+    indent = 4,
+    spaces = true
+  },
+  js = {
+    indent = 4,
+    spaces = true
   }
 }
+
+function set_filetype_tabs()
+  local settings = tabs[vim.bo.filetype]
+  if settings then
+    vim.bo.expandtab = settings.spaces
+    vim.bo.shiftwidth = settings.indent
+    vim.bo.tabstop = settings.indent
+    vim.bo.softtabstop = settings.indent
+  end
+end
+
 -- Settings
 -------------------------------------------------------------------------------
 opt('b', 'shiftwidth', tabs.general.indent)             -- Size of indent
@@ -137,6 +148,7 @@ cmd [[command! Notes lua require'notes'.open()]]
 cmd [[command! SaveNotes lua require'notes'.save()]]
 cmd [[command! UpdateNotes lua require'notes'.update()]]
 cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
+cmd [[command! ReloadBuffer :e! %]]
 -- FastBuf
 cmd [[command! -nargs=0 FbPin lua require'fastbuf'.pin_buffer()]]
 cmd [[command! -nargs=0 FbUnpin lua require'fastbuf'.unpin_buffer()]]
@@ -150,12 +162,14 @@ cmd [[command! P4revert :lua require'p4'.revert()]]
 cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
 cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
 cmd [[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]]
--- Perforce
-cmd [[command! -nargs=0 ClangFormat :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
--- Clang
-cmd [[command! -nargs=0 ClangFmt :silent execute printf('!clang-format.exe -i %s', expand("%:p"))]]
--- pwsh
-cmd "command! EditPowerShellProfile :exec printf(':e C:\\Users\\per.larsson\\OneDrive\\Dokument\\PowerShell\\Microsoft.PowerShell_profile.ps1')"
+-- FZF
+cmd [[command! FzfFiles :lua require'fzf-cmds'.files()]]
+cmd [[command! FzfBuffers :lua require'fzf-cmds'.buffers()]]
+-- Lsp
+cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
+cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
+--NvimTree
+map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -174,19 +188,13 @@ map('i', '{', '{}<Left>')
 map('i', '[', '[]<Left>')
 
 -- File operations
-map('n', '<leader>fc', '<cmd>CopyPath<CR>')
-map('n', '<leader>fcd', '<cmd>CopyDir<CR>')
-map('n', '<leader>fr', [[<cmd>:e %<CR><cmd>echo printf('"%s" reloaded', expand('%:p'))<CR>]])
-map('n', '<leader>ffr', [[<cmd>:e! %<CR><cmd>echo printf('"%s" force reloaded', expand('%:p'))<CR>]])
-map('n', '<C-Tab>', '<cmd>FbSelectPinned<CR>')
-map('n', '<leader>sp', '<cmd>FbSelectPinned<CR>')
-map('n', '<A-CR>', '<cmd>FbTogglePinned<CR>')
-map('n', '<leader>fp', '<cmd>FbTogglePinned<CR>')
+map('n', '<leader>f', '<cmd>FzfFiles<CR>')
+map('n', '<leader>b', '<cmd>FzfBuffers<CR>')
+map('n', '<leader>e', '<cmd>P4edit<CR>')
+map('n', '<leader>r', '<cmd>P4revert<CR>')
+map('n', '<leader>cp', '<cmd>CopyPath<CR>')
+map('n', '<leader>cd', '<cmd>CopyDir<CR>')
 map('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
-
--- Perforce operations
-map('n', '<leader>pe', '<cmd>P4edit<CR>')
-map('n', '<leader>pr', '<cmd>P4rever<CR>')
 
 -- PSUE
 map('n', '<leader>qf', '<cmd>UEquickfix<CR>')
@@ -198,12 +206,6 @@ map('n', '<A-k>', '<cmd>cp<CR>')
 map('n', '<leader>eo', '<cmd>copen 20<CR>')
 map('n', '<leader>ec', '<cmd>cclose<CR>')
 
--- FZF
-map('n', '<C-p>', '<cmd>Files<CR>')
-map('n', '<C-;>', '<cmd>Buffers<CR>')
-map('n', '<leader>p', '<cmd>Buffers<CR>')
---set_var('fzf_preview_window', '')
-
 -- Folding
 map('n', '<space>', 'za')
 map('n', '<C-space>', 'zR')
@@ -213,6 +215,7 @@ map('n', '<S-space>', 'zM')
 map('n', 'gw', '<cmd>vim <cword> %<CR>:copen<CR>')
 map('n', 'Gw', '<cmd>Grep <cword><CR>')
 map('n', 'S', [[:%s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
+map('n', 'R', [[:,$s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
 
 -- Snippets
 map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
@@ -225,10 +228,16 @@ map('n', '<A-Down>', '<cmd>resize -2<CR>')
 map('n', '<A-Right>', '<cmd>vertical resize +2<CR>')
 map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
 
-map('n', 'tf', [[<cmd>lua require('telescope.builtin').find_files()<cr>]])
-
 -- Statusline
 -------------------------------------------------------------------------------
+local function lualine_tab_info()
+  local indent = 'tabs'
+	if vim.bo.expandtab then
+	  indent = 'spaces'
+	end
+	return string.format('%s:%d', indent, vim.bo.shiftwidth)
+end
+
 require('lualine').setup {
   options = { 
     icons_enabled = false,
@@ -241,7 +250,7 @@ require('lualine').setup {
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
-    lualine_y = { require'lsp'.get_buf_client_name, 'encoding', 'fileformat', 'filetype' },
+    lualine_y = { require'lsp'.get_buf_client_name, 'encoding', 'fileformat', 'filetype', lualine_tab_info },
     lualine_z = { 'location'  },
   },
   inactive_sections = {
@@ -280,49 +289,9 @@ require'nvim-tree'.setup {
   }
 }
 
-map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
-
 -- LSP
 -------------------------------------------------------------------------------
 require'lsp'.setup()
---set_var('completion_matching_strategy_list', {'exact', 'substring', 'fuzzy', 'all'})
---map('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
---map('n', 'gD', '<cmd>:lua vim.lsp.buf.declaration()<CR>')
-cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
-cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
-
--- Filetype hooks
--------------------------------------------------------------------------------
-g_filetype_hooks = {
-  lua = function()
-    vim.bo.expandtab = tabs.lua.spaces
-    vim.bo.shiftwidth = tabs.lua.indent
-    vim.bo.tabstop = tabs.lua.indent
-    vim.bo.softtabstop = tabs.lua.indent
-  end,
-  pwsh = function()
-    vim.bo.expandtab = true
-  end,
-  js = function()
-    vim.bo.expandtab = true
-  end,
-  rs = function()
-    vim.bo.expandtab = true
-    vim.bo.shiftwidth = 4
-    vim.bo.tabstop = 4
-    vim.bo.softtabstop = 4
-  end
-}
-
-nvim_create_augroups {
-  filetype_hooks = {
-    { 'FileType', 'lua', [[lua g_filetype_hooks.lua()]] },
-    { 'FileType', 'psm1', [[lua g_filetype_hooks.pwsh()]] },
-    { 'FileType', 'ps1', [[lua g_filetype_hooks.pwsh()]] },
-    { 'FileType', 'js', [[lua g_filetype_hooks.js()]] },
-    { 'FileType', 'rs', [[lua g_filetype_hooks.rs()]] }
-  }
-}
 
 --Terminal
 -------------------------------------------------------------------------------
@@ -331,6 +300,9 @@ map('t', '<Esc>', [[<C-\><C-n>]])
 local autocmds = {
   terminal = {
     { 'TermOpen', '*', 'startinsert' }
+  },
+  set_tabs = {
+    { 'FileType', '*', [[lua set_filetype_tabs()]] }
   }
 }
 nvim_create_augroups(autocmds)
