@@ -1,13 +1,16 @@
 local fzf = require 'fzf'.fzf
 
+require 'fzf'.default_options = {
+  height = 30
+}
+
 local FzfCmds = {}
 
 function FzfCmds.files()
-  local command = 'fd'
-	local opts = '--ansi'
+  local command = 'fd -tf'
 
 	coroutine.wrap(function()
-		local results = fzf(command, opts)
+		local results = fzf(command)
 		if not results then return end
     local file = vim.fn.fnameescape(results[1])
 		vim.cmd('e ' .. file)
@@ -29,6 +32,24 @@ function FzfCmds.buffers()
 		if not results then return end
 		local buf_id = tonumber(string.match(results[1], '%d+'))
 		vim.cmd('b ' .. buf_id)
+	end)()
+end
+
+
+function FzfCmds.tags()
+  local command = 'readtags -t tags -l'
+
+	coroutine.wrap(function()
+		local results = fzf(command, opts)
+		if not results then return end
+
+    local tokens={}
+    for token in string.gmatch(results[1], "([^\t]+)") do
+      table.insert(tokens, token)
+    end
+
+    local file = vim.fn.fnameescape(tokens[2])
+		vim.cmd('e ' .. file)
 	end)()
 end
 

@@ -13,12 +13,11 @@ require "paq" {
   'hoob3rt/lualine.nvim';
   'RishabhRD/popfix';
   {'folke/tokyonight.nvim', branch = 'main'};
+  'ellisonleao/gruvbox.nvim'; 
   'hrsh7th/nvim-cmp';
   'hrsh7th/cmp-buffer';
   'hrsh7th/cmp-nvim-lua';
   'hrsh7th/cmp-nvim-lsp';
-  'hrsh7th/cmp-path';
-  'hrsh7th/cmp-cmdline';
   'delphinus/cmp-ctags';
   'tpope/vim-fugitive';
   'kyazdani42/nvim-tree.lua';
@@ -34,15 +33,32 @@ package.loaded['fastbuf'] = nil
 package.loaded['lsp'] = nil
 package.loaded['notes'] = nil
 
--- Theme
+-- Theme(s)
 -------------------------------------------------------------------------------
---local theme = { colorscheme = 'gruvbox8_hard', background = 'light', lualine_theme = 'gruvbox'}
-local theme = { colorscheme = 'tokyonight-night', background = 'dark', lualine_theme = 'tokyonight'}
+require("gruvbox").setup({
+  undercurl = true,
+  underline = true,
+  bold = true,
+  italic = false,
+  strikethrough = true,
+  invert_selection = false,
+  invert_signs = false,
+  invert_tabline = false,
+  invert_intend_guides = true,
+  inverse = true, -- invert background for search, diffs, statuslines and errors
+  contrast = "hard", -- can be "hard", "soft" or empty string
+  palette_overrides = {},
+  overrides = {},
+  dim_inactive = false,
+  transparent_mode = false,
+})
+
+local theme = { colorscheme = 'gruvbox', background = 'light', lualine_theme = 'gruvbox'}
+--local theme = { colorscheme = 'tokyonight-night', background = 'dark', lualine_theme = 'tokyonight-night'}
 
 cmd('set termguicolors')
 cmd('set background=' .. theme.background)
 cmd('colorscheme ' .. theme.colorscheme)
-set_var('fzf_layout', { down = '20%' })
 
 -- Settings
 -------------------------------------------------------------------------------
@@ -120,7 +136,7 @@ opt('w', 'list', false)                                 -- Show some invisible c
 opt('w', 'number', true)                                -- Print line number
 opt('w', 'relativenumber', false)                       -- Relative line numbers
 opt('w', 'wrap', false)                                 -- Disable wrapping
-opt('o', 'completeopt', 'menuone,noselect')             -- Completion options (for deoplete)
+opt('o', 'completeopt', 'menu,menuone,noselect')        -- Completion options
 opt('o', 'shiftround', true)                            -- Round indent
 opt('o', 'scrolloff', 4 )                               -- Lines of context
 opt('o', 'sidescrolloff', 8)                            -- Columns of context
@@ -131,8 +147,6 @@ opt('o', 'termguicolors', true)                         -- True color support
 opt('o', 'wildmode', 'full')                            -- Command-line completion mode
 opt('o', 'ttyfast', true)                               -- Should make scrolling faster
 opt('o', 'lazyredraw', false)                            -- Same as above
-opt('o', 'ignorecase', true)                            -- 
-opt('o', 'smartcase', true)                             -- 
 opt('w', 'foldmethod', 'syntax')                        -- Fold method
 opt('o', 'foldcolumn', '0')                             -- Fold columns
 opt('o', 'foldlevelstart', 99)                          -- Default fold level
@@ -165,6 +179,7 @@ cmd [[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]]
 -- FZF
 cmd [[command! FzfFiles :lua require'fzf-cmds'.files()]]
 cmd [[command! FzfBuffers :lua require'fzf-cmds'.buffers()]]
+cmd [[command! FzfTags :lua require'fzf-cmds'.tags()]]
 -- Lsp
 cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
 cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
@@ -190,8 +205,9 @@ map('i', '[', '[]<Left>')
 -- File operations
 map('n', '<leader>f', '<cmd>FzfFiles<CR>')
 map('n', '<leader>b', '<cmd>FzfBuffers<CR>')
-map('n', '<leader>e', '<cmd>P4edit<CR>')
-map('n', '<leader>r', '<cmd>P4revert<CR>')
+map('n', '<leader>t', '<cmd>FzfTags<CR>')
+map('n', '<leader>pe', '<cmd>P4edit<CR>')
+map('n', '<leader>pr', '<cmd>P4revert<CR>')
 map('n', '<leader>cp', '<cmd>CopyPath<CR>')
 map('n', '<leader>cd', '<cmd>CopyDir<CR>')
 map('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
@@ -227,6 +243,9 @@ map('n', '<A-Up>', '<cmd>resize +2<CR>')
 map('n', '<A-Down>', '<cmd>resize -2<CR>')
 map('n', '<A-Right>', '<cmd>vertical resize +2<CR>')
 map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
+
+-- Lsp
+map('n', 'gd', '<cmd>lua vim.lsp.buf.declaration()<CR>')
 
 -- Statusline
 -------------------------------------------------------------------------------

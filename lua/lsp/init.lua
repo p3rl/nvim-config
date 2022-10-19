@@ -47,10 +47,8 @@ function Lsp.setup(opts)
     }),
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-      { name = 'cmp_ctags' },
-      }, {
-        { name = 'buffer' },
-      }),
+      { name = 'buffer' }
+    }),
     enabled = function()
       if vim.bo.filetype == 'markdown' then
         return false
@@ -59,23 +57,8 @@ function Lsp.setup(opts)
       end
     end
   }
-  cmp.setup.cmdline('/', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' }
-    }
-  })
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
-      { name = 'path' }
-    }, {
-      { name = 'cmdline' }
-    })
-  })
 
-  local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+  local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
   lspconfig.clangd.setup {
     root_dir = lspconfig.util.root_pattern('compile_commands.json', '.zenroot', '.p4config', '.gitignore'),
