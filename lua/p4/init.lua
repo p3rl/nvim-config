@@ -112,4 +112,10 @@ function P4.timelapse_view(filename)
   return vim.fn.system('p4vc timelapse ' .. file)
 end
 
+function P4.history_view(filename)
+  local file = file_or_buffer(filename)
+  print("[P4]: Launching History View for '" .. file .. "'")
+  return vim.fn.system('p4vc history ' .. file)
+end
+
 return P4

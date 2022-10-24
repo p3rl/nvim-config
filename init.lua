@@ -175,6 +175,7 @@ cmd [[command! P4edit :lua require'p4'.edit()]]
 cmd [[command! P4revert :lua require'p4'.revert()]]
 cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
 cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
+cmd [[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]]
 cmd [[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]]
 -- FZF
 cmd [[command! FzfFiles :lua require'fzf-cmds'.files()]]
