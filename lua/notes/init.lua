@@ -1,14 +1,25 @@
 local notes_repo = "c:/git/docs"
 
-local Notes = {}
+local Notes = {
+  config = {
+    root_path = "",
+    path = ""
+  }
+}
+
+function Notes.setup(config)
+  Notes.config = config
+end
 
 function Notes.open()
-  vim.cmd [[:e c:/git/docs/ue/ue.md]]
+  local path = Notes.config.path
+  vim.cmd (string.format("e %s", path))
 end
 
 function Notes.save()
-  print(vim.fn.system('git ' .. string.format("-C %s commit -a -m %s", notes_repo, "Update")))
-  print(vim.fn.system('git ' .. string.format("-C %s push", notes_repo)))
+  local path = Notes.config.root_path
+  print(vim.fn.system('git ' .. string.format("-C %s commit -a -m %s", path, "Update")))
+  print(vim.fn.system('git ' .. string.format("-C %s push", path)))
 end
 
 function Notes.update()

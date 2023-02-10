@@ -8,6 +8,7 @@ require "paq" {
   'savq/paq-nvim';
   'nvim-lua/popup.nvim';
   'nvim-lua/plenary.nvim';
+  'MunifTanjim/nui.nvim';
   'neovim/nvim-lspconfig';
   'vijaymarupudi/nvim-fzf';
   'hoob3rt/lualine.nvim';
@@ -20,7 +21,8 @@ require "paq" {
   'hrsh7th/cmp-nvim-lsp';
   'delphinus/cmp-ctags';
   'tpope/vim-fugitive';
-  'kyazdani42/nvim-tree.lua';
+  {'nvim-neo-tree/neo-tree.nvim', branch = 'v2.x'};
+--  'kyazdani42/nvim-tree.lua';
   'rust-lang/rust.vim';
 }
 
@@ -53,8 +55,9 @@ require("gruvbox").setup({
   transparent_mode = false,
 })
 
-local theme = { colorscheme = 'gruvbox', background = 'light', lualine_theme = 'gruvbox'}
---local theme = { colorscheme = 'tokyonight-night', background = 'dark', lualine_theme = 'tokyonight-night'}
+--local theme = { colorscheme = 'oh-lucy', background = 'dark', lualine_theme = 'oh-lucy'}
+--local theme = { colorscheme = 'gruvbox', background = 'light', lualine_theme = 'gruvbox'}
+local theme = { colorscheme = 'tokyonight-night', background = 'dark', lualine_theme = 'tokyonight-night'}
 
 cmd('set termguicolors')
 cmd('set background=' .. theme.background)
@@ -145,8 +148,8 @@ opt('o', 'splitbelow', true)                            -- Put new windows below
 opt('o', 'splitright', true)                            -- Put new windows right of current
 opt('o', 'termguicolors', true)                         -- True color support
 opt('o', 'wildmode', 'full')                            -- Command-line completion mode
-opt('o', 'ttyfast', true)                               -- Should make scrolling faster
-opt('o', 'lazyredraw', false)                            -- Same as above
+--opt('o', 'ttyfast', true)                               -- Should make scrolling faster
+--opt('o', 'lazyredraw', false)                            -- Same as above
 opt('w', 'foldmethod', 'syntax')                        -- Fold method
 opt('o', 'foldcolumn', '0')                             -- Fold columns
 opt('o', 'foldlevelstart', 99)                          -- Default fold level
@@ -157,6 +160,7 @@ cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
 cmd 'command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")'
 cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
 cmd "command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))"
+cmd [[command! EditBuildConfig :exec printf(':e %s', 'C:\Users\per.larsson\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml')]]
 cmd [[command! UEquickfix :lua require'psue'.read_quickfix()]]
 cmd [[command! Notes lua require'notes'.open()]]
 cmd [[command! SaveNotes lua require'notes'.save()]]
@@ -185,7 +189,7 @@ cmd [[command! FzfTags :lua require'fzf-cmds'.tags()]]
 cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
 cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
 --NvimTree
-map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
+--map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
 
 -- Mappings
 -------------------------------------------------------------------------------
@@ -205,7 +209,7 @@ map('i', '[', '[]<Left>')
 
 -- File operations
 map('n', '<leader>f', '<cmd>FzfFiles<CR>')
-map('n', '<leader>b', '<cmd>FzfBuffers<CR>')
+map('n', ';', '<cmd>FzfBuffers<CR>')
 map('n', '<leader>t', '<cmd>FzfTags<CR>')
 map('n', '<leader>pe', '<cmd>P4edit<CR>')
 map('n', '<leader>pr', '<cmd>P4revert<CR>')
@@ -236,8 +240,8 @@ map('n', 'R', [[:,$s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<
 
 -- Snippets
 map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
-map('i', '<F9>', "PRAGMA_DISABLE_OPTIMIZATION")
-map('i', '<S-F9>', "PRAGMA_ENABLE_OPTIMIZATION")
+map('i', '<F9>', "UE_DISABLE_OPTIMIZATION")
+map('i', '<S-F9>', "UE_ENABLE_OPTIMIZATION")
 
 -- Window
 map('n', '<A-Up>', '<cmd>resize +2<CR>')
@@ -284,34 +288,46 @@ require('lualine').setup {
   extensions = { 'fzf', 'quickfix', 'nvim-tree' }
 }
 
+-- NeoTree
+-------------------------------------------------------------------------------
+map('n', '<F1>', '<cmd>NeoTreeRevealToggle<CR>')
+map('n', '<F2>', '<cmd>NeoTreeFloatToggle<CR>')
+
 -- NvimTree
 -------------------------------------------------------------------------------
-require'nvim-tree'.setup {
-  disable_netrw       = true,
-  hijack_netrw        = false,
-  open_on_setup       = false,
-  ignore_ft_on_setup  = {},
-  open_on_tab         = false,
-  hijack_cursor       = false,
-  update_cwd          = false,
-  update_focused_file = {
-    enable      = true,
-    update_cwd  = false,
-    ignore_list = {}
-  },
-  view = {
-    width = 50,
-    side = 'left',
-    mappings = {
-      custom_only = false,
-      list = {}
-    }
-  }
-}
+--require'nvim-tree'.setup {
+--  disable_netrw       = true,
+--  hijack_netrw        = false,
+--  open_on_setup       = false,
+--  ignore_ft_on_setup  = {},
+--  open_on_tab         = false,
+--  hijack_cursor       = false,
+--  update_cwd          = false,
+--  update_focused_file = {
+--    enable      = true,
+--    update_cwd  = false,
+--    ignore_list = {}
+--  },
+--  view = {
+--    width = 50,
+--    side = 'left',
+--    mappings = {
+--      custom_only = false,
+--      list = {}
+--    }
+--  }
+--}
 
 -- LSP
 -------------------------------------------------------------------------------
 require'lsp'.setup()
+
+-- Notes
+-------------------------------------------------------------------------------
+require'notes'.setup{
+  root_path = "c:/git/docs",
+  path = "c:/git/docs/ue/2023.md"
+}
 
 --Terminal
 -------------------------------------------------------------------------------
