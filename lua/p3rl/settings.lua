@@ -14,14 +14,12 @@ function Settings.setup(opts)
     vim.opt.number = true
     vim.opt.relativenumber = false
     vim.opt.wrap = false
-    vim.opt.hlsearch = false
+    vim.opt.hlsearch = true
     vim.opt.incsearch = true
     vim.opt.scrolloff = 8
     vim.opt.signcolumn = "no"
-    vim.opt.updatetime = 50
-    vim.opt.colorcolumn = "140"
-
-    Settings.setup_tabs(opts.tabs or { width = 4, expand = true })
+    --vim.opt.updatetime = 50
+    --vim.opt.colorcolumn = "140"
 
     vim.cmd('set termguicolors')
     vim.cmd('syntax enable')
@@ -29,18 +27,9 @@ function Settings.setup(opts)
     vim.cmd('set ignorecase')
     vim.cmd('set noswapfile')
     vim.cmd('set clipboard+=unnamedplus')
-
-	require("rose-pine").setup({
-		dark_variant = 'main',
-		disable_italics = true,
-		bold_vert_split = false,
-		dim_nc_background = false,
-		disable_background = false,
-		disable_float_background = false,
-	})
+    vim.cmd('set splitright')
     
-vim.cmd('colorscheme ' .. opts.colorscheme.name)
-    vim.cmd('set background=' .. opts.colorscheme.background)
+	Settings.setup_tabs(opts.tabs or { width = 4, expand = true })
 end
 
 return Settings

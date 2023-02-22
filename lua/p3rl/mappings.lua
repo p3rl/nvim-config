@@ -49,7 +49,7 @@ vim.keymap.set('n', '<leader>qf', '<cmd>UEquickfix<CR>')
 
 -- Perforce
 vim.keymap.set('n', '<leader>ef', '<cmd>P4edit<CR>')
-vim.keymap.set('n', '<leader>rf', '<cmd>P4edit<CR>')
+vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
 
 -- Format
 vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])

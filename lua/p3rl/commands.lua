@@ -6,7 +6,6 @@ function Commands.setup(opts)
     vim.cmd("command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))")
     vim.cmd("command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))")
     vim.cmd([[command! EditBuildConfig :exec printf(':e %s', 'C:\Users\per.larsson\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml')]])
-    vim.cmd([[command! UEquickfix :lua require'psue'.read_quickfix()]])
 
     -- Notes
     vim.cmd([[command! Notes lua require'p3rl.notes'.open()]])
@@ -29,6 +28,13 @@ function Commands.setup(opts)
     vim.cmd([[command! FzfFiles :lua require'p3rl.fzf-cmds'.files()]])
     vim.cmd([[command! FzfBuffers :lua require'p3rl.fzf-cmds'.buffers()]])
     vim.cmd([[command! FzfTags :lua require'p3rl.fzf-cmds'.tags()]])
+
+	-- UE
+	vim.api.nvim_create_user_command('UEquickfix',
+		function()
+			require'p3rl.utils'.read_quickfix()
+		end,
+		{})
 end
 
 return Commands
