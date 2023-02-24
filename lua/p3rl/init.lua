@@ -13,14 +13,8 @@ local rose_pine = {
 	background = 'dark'
 }
 
-local catppuccin_light = {
-	colorscheme = 'catppuccin', -- latte, frappe, macchiato, mocha
-	flavour = 'latte',
-	background = 'light'
-}
-
 local tokyo = {
-	colorscheme = 'tokyonight-night', -- latte, frappe, macchiato, mocha
+	colorscheme = 'tokyonight-night',
 	background = 'dark'
 }
 
