@@ -79,11 +79,6 @@ _G.packer_plugins = {
     path = "C:\\Users\\per.larsson\\AppData\\Local\\nvim-data\\site\\pack\\packer\\start\\LuaSnip",
     url = "https://github.com/L3MON4D3/LuaSnip"
   },
-  catppuccin = {
-    loaded = true,
-    path = "C:\\Users\\per.larsson\\AppData\\Local\\nvim-data\\site\\pack\\packer\\start\\catppuccin",
-    url = "https://github.com/catppuccin/nvim"
-  },
   ["cmp-buffer"] = {
     loaded = true,
     path = "C:\\Users\\per.larsson\\AppData\\Local\\nvim-data\\site\\pack\\packer\\start\\cmp-buffer",
@@ -113,6 +108,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "C:\\Users\\per.larsson\\AppData\\Local\\nvim-data\\site\\pack\\packer\\start\\friendly-snippets",
     url = "https://github.com/rafamadriz/friendly-snippets"
+  },
+  harpoon = {
+    loaded = true,
+    path = "C:\\Users\\per.larsson\\AppData\\Local\\nvim-data\\site\\pack\\packer\\start\\harpoon",
+    url = "https://github.com/theprimeagen/harpoon"
   },
   ["lsp-zero.nvim"] = {
     loaded = true,

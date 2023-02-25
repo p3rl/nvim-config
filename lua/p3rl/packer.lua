@@ -4,7 +4,6 @@ return require('packer').startup(function(use)
 	use('wbthomason/packer.nvim')
 	use({'rose-pine/neovim', as = 'rose-pine'})
 	use({'folke/tokyonight.nvim'})
-	use {'catppuccin/nvim', as = 'catppuccin'}
 	use('vijaymarupudi/nvim-fzf')
 
 	use({
@@ -43,4 +42,6 @@ return require('packer').startup(function(use)
 			{'rafamadriz/friendly-snippets'}, -- Optional
 		}
 	}
+
+	use('theprimeagen/harpoon')
 end)
