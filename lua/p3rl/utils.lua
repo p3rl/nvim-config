@@ -2,6 +2,11 @@ local Utils = {
     psue_root_dir = nil
 }
 
+function _G.dump(...)
+    local objects = vim.tbl_map(vim.inspect, {...})
+    print(unpack(objects))
+end
+
 function Utils.setup(opts)
 end
 

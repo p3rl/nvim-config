@@ -1,10 +1,28 @@
 require("p3rl.packer")
 
 require("p3rl.settings").setup{
-    tabs = {
-        width = 4,
-        expand = false
-    }
+	tabs = {
+		general = {
+			width = 4,
+			expand = true
+		},
+		c = {
+			width = 4,
+			expand = false
+		},
+		cpp = {
+			width = 4,
+			expand = false
+		},
+		lua = {
+			width = 4,
+			expand = true
+		},
+		rs = {
+			width = 4,
+			expand = true
+		}
+	}
 }
 
 local rose_pine = {
@@ -19,7 +37,6 @@ local tokyo = {
 }
 
 require('p3rl.colors').setup(tokyo)
-
 require("p3rl.utils").setup{}
 require("p3rl.p4").setup{}
 require("p3rl.grep").setup{}

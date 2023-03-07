@@ -29,12 +29,47 @@ function Commands.setup(opts)
     vim.cmd([[command! FzfBuffers :lua require'p3rl.fzf-cmds'.buffers()]])
     vim.cmd([[command! FzfTags :lua require'p3rl.fzf-cmds'.tags()]])
 
-	-- UE
-	vim.api.nvim_create_user_command('UEquickfix',
-		function()
-			require'p3rl.utils'.read_quickfix()
-		end,
-		{})
+    -- UE
+    vim.api.nvim_create_user_command('UEquickfix',
+        function()
+            require'p3rl.utils'.read_quickfix()
+        end,
+        {})
+
+    vim.api.nvim_create_user_command('SetTabs',
+        function(opts)
+            if not opts.fargs or #opts.fargs == 0 then
+                print("SetTabs <with:int> <expand:boolean>")
+                return
+            end
+
+            local expand = false
+            if #opts.fargs > 1 and opts.fargs[2] == 'true' then
+                expand = true
+            end
+            local tabs = {
+                width = tonumber(opts.fargs[1]),
+                expand = expand
+            }
+            require'p3rl.settings'.setup_tabs(tabs)
+            print(string.format("Set tabs, with=%d, spaces='%s'", tabs.width, tostring(tabs.expand)))
+        end,
+        {
+            nargs = "*"
+        })
+    
+    vim.api.nvim_create_user_command('TabSettings',
+        function(opts)
+            print(string.format("<tabstop=%d>, <expandtab='%s'>", vim.bo.tabstop, tostring(vim.bo.expandtab)))
+        end,
+        {})
+
+    vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+        pattern = '*',
+        callback = function(opts)
+            require'p3rl.settings'.update_tabsettings(vim.bo.filetype)
+        end
+    })
 end
 
 return Commands

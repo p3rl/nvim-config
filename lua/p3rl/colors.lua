@@ -11,14 +11,6 @@ function Colors.setup(opts)
 			disable_background = false,
 			disable_float_background = false,
 		})
-	elseif opts.colorscheme == 'catppuccin' then
-		require('catppuccin').setup({
-			flavour = opts.flavour, -- latte, frappe, macchiato, mocha
-			background = { -- :h background
-				light = "latte",
-				dark = "mocha",
-			}
-		})
 	end
 	
 	vim.cmd('set background=' .. opts.background or 'dark')

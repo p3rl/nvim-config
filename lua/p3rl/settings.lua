@@ -1,4 +1,5 @@
 local Settings = {
+	tabs = nil
 }
 
 function Settings.setup_tabs(opts)
@@ -7,9 +8,13 @@ function Settings.setup_tabs(opts)
     vim.opt.shiftwidth = opts.width
     vim.opt.expandtab = opts.expand
     vim.opt.smartindent = true
+    vim.opt.autoindent = true
+    vim.opt.cindent = true
 end
 
 function Settings.setup(opts)
+	Settings.tabs = opts.tabs
+
     vim.g.mapleader = ","
     vim.opt.number = true
     vim.opt.relativenumber = false
@@ -28,8 +33,17 @@ function Settings.setup(opts)
     vim.cmd('set noswapfile')
     vim.cmd('set clipboard+=unnamedplus')
     vim.cmd('set splitright')
-    
-	Settings.setup_tabs(opts.tabs or { width = 4, expand = true })
+	Settings.setup_tabs(opts.tabs.general)
+end
+
+function Settings.update_tabsettings(filetype)
+    local settings = Settings.tabs[filetype] or nil
+    if settings then
+        vim.bo.tabstop = settings.width
+        vim.bo.softtabstop = settings.width
+        vim.bo.shiftwidth = settings.width
+        vim.bo.expandtab = settings.expand
+    end
 end
 
 return Settings
