@@ -1,35 +1,5 @@
 require("p3rl.packer")
-
-require("p3rl.settings").setup{
-	tabs = {
-		general = {
-			width = 4,
-			expand = true
-		},
-		c = {
-			width = 4,
-			expand = false
-		},
-		cpp = {
-			width = 4,
-			expand = false
-		},
-		lua = {
-			width = 4,
-			expand = true
-		},
-		rs = {
-			width = 4,
-			expand = true
-		}
-	}
-}
-
-local rose_pine = {
-	colorscheme = 'rose-pine',
-	flavour = 'main',
-	background = 'dark'
-}
+require("p3rl.settings").setup{}
 
 local tokyo = {
 	colorscheme = 'tokyonight-night',

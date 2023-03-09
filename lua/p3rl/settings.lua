@@ -1,5 +1,30 @@
 local Settings = {
-	tabs = nil
+    tabs = {
+        general = {
+            width = 4,
+            expand = true
+        },
+        c = {
+            width = 4,
+            expand = false
+        },
+        cpp = {
+            width = 4,
+            expand = false
+        },
+        cs = {
+            width = 4,
+            expand = false
+        },
+        lua = {
+            width = 4,
+            expand = true
+        },
+        rs = {
+            width = 4,
+            expand = true
+        }
+    }
 }
 
 function Settings.setup_tabs(opts)
@@ -13,8 +38,6 @@ function Settings.setup_tabs(opts)
 end
 
 function Settings.setup(opts)
-	Settings.tabs = opts.tabs
-
     vim.g.mapleader = ","
     vim.opt.number = true
     vim.opt.relativenumber = false
@@ -23,7 +46,7 @@ function Settings.setup(opts)
     vim.opt.incsearch = true
     vim.opt.scrolloff = 8
     vim.opt.signcolumn = "no"
-    --vim.opt.updatetime = 50
+    vim.opt.updatetime = 50
     --vim.opt.colorcolumn = "140"
 
     vim.cmd('set termguicolors')
@@ -33,7 +56,8 @@ function Settings.setup(opts)
     vim.cmd('set noswapfile')
     vim.cmd('set clipboard+=unnamedplus')
     vim.cmd('set splitright')
-	Settings.setup_tabs(opts.tabs.general)
+
+    Settings.setup_tabs(Settings.tabs.general)
 end
 
 function Settings.update_tabsettings(filetype)
