@@ -45,9 +45,9 @@ function Settings.setup(opts)
     vim.opt.hlsearch = true
     vim.opt.incsearch = true
     vim.opt.scrolloff = 8
-    vim.opt.signcolumn = "no"
-    vim.opt.updatetime = 50
-    --vim.opt.colorcolumn = "140"
+    --vim.opt.signcolumn = "no"
+    --vim.opt.updatetime = 50
+    vim.opt.colorcolumn = "1400"
 
     vim.cmd('set termguicolors')
     vim.cmd('syntax enable')

@@ -4,12 +4,8 @@ return require('packer').startup(function(use)
     use('wbthomason/packer.nvim')
 
     use({'folke/tokyonight.nvim'})
-    use('vijaymarupudi/nvim-fzf')
-
-    use({
-        'nvim-telescope/telescope.nvim', branch = '0.1.x',
-        requires = { {'nvim-lua/plenary.nvim'} }
-    })
+    use({'ellisonleao/gruvbox.nvim'})
+    use({'vijaymarupudi/nvim-fzf'})
 
     use({'nvim-treesitter/nvim-treesitter', as = 'nvim-treesitter', { run = ':TSUpdate'} })
 
@@ -43,5 +39,10 @@ return require('packer').startup(function(use)
         }
     }
 
-    use('theprimeagen/harpoon')
+    use {
+        'theprimeagen/harpoon',
+        requires = {
+            {'nvim-lua/plenary.nvim'}
+        }
+    }
 end)

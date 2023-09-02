@@ -1,7 +1,7 @@
 -- Misc
 vim.keymap.set('n', '<S-l>', '$')
 vim.keymap.set('n', '<S-h>', '0')
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+vim.keymap.set("n", "<F1>", vim.cmd.Ex)
 vim.keymap.set("n", "<leader>s", ":w<CR>")
 
 vim.keymap.set("i", "jk", "<Esc>")
