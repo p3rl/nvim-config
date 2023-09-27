@@ -1,6 +1,6 @@
 local Grep = {}
 
-function Grep.setup(opts)
+function Grep.setup()
 end
 
 function Grep.async_grep(args)

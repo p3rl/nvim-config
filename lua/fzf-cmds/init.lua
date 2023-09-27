@@ -1,13 +1,9 @@
 local fzf = require 'fzf'.fzf
-
 require 'fzf'.default_options = {
     height = 30
 }
 
 local FzfCmds = {}
-
-function FzfCmds.setup(opts)
-end
 
 function FzfCmds.files()
     local command = 'fd -tf'
@@ -43,7 +39,7 @@ function FzfCmds.tags()
     local command = 'readtags -t tags -l'
 
     coroutine.wrap(function()
-        local results = fzf(command, opts)
+        local results = fzf(command)
         if not results then return end
 
         local tokens={}
