@@ -144,18 +144,18 @@ vim.cmd([[command! UpdateNotes lua require'p3rl.notes'.update()]])
 vim.cmd([[command! ReloadBuffer :e! %]])
 
 -- Perforce
-vim.cmd([[command! -nargs=* P4init :lua require'p3rl.p4'.init(<q-args>)]])
-vim.cmd([[command! P4edit :lua require'p3rl.p4'.edit()]])
-vim.cmd([[command! P4revert :lua require'p3rl.p4'.revert()]])
-vim.cmd([[command! -nargs=? P4revgraph :lua require'p3rl.p4'.revision_graph(<q-args>)]])
-vim.cmd([[command! -nargs=? P4timelapse :lua require'p3rl.p4'.timelapse_view(<q-args>)]])
-vim.cmd([[command! -nargs=? P4history :lua require'p3rl.p4'.history_view(<q-args>)]])
-vim.cmd([[command! -nargs=? P4depotpath :lua require'p3rl.p4'.copy_depot_path(<q-args>)]])
+vim.cmd([[command! -nargs=* P4init :lua require'p4'.init(<q-args>)]])
+vim.cmd([[command! P4edit :lua require'p4'.edit()]])
+vim.cmd([[command! P4revert :lua require'p4'.revert()]])
+vim.cmd([[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]])
+vim.cmd([[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]])
+vim.cmd([[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]])
+vim.cmd([[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]])
 
 -- UE
 vim.api.nvim_create_user_command('UEquickfix',
 function()
-    require'p3rl.utils'.read_quickfix()
+    require'utils'.read_quickfix()
 end,
 {})
 
