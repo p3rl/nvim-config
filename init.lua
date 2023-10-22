@@ -19,16 +19,18 @@ vim.g.mapleader = ","
 -- Plugins
 -------------------------------------------------------------------------------
 require("lazy").setup({
+    {"nvim-lua/plenary.nvim"},
+    {"theprimeagen/harpoon"},
     {"folke/tokyonight.nvim", lazy = false},
-    { "ellisonleao/gruvbox.nvim", priority = 1000 , config = true, opts = {
+    {"ellisonleao/gruvbox.nvim", priority = 1000 , config = true, opts = {
         terminal_colors = true, -- add neovim terminal colors
         undercurl = true,
         underline = true,
         bold = true,
         italic = {
-            strings = true,
-            emphasis = true,
-            comments = true,
+            strings = false,
+            emphasis = false,
+            comments = false,
             operators = false,
             folds = true,
         },
@@ -115,20 +117,12 @@ require("tokyonight").setup({
     lualine_bold = false, -- When `true`, section headers in the lualine theme will be bold
 })
 
---require("gruvbox").setup({
---    undercurl = true,
---    underline = true,
---    bold = true,
---    italic = false,
---    strikethrough = true,
---    contrast = "hard", -- can be "hard", "soft" or empty string
---    palette_overrides = {},
---    overrides = {},
---})
-
 -- Settings
 -------------------------------------------------------------------------------
-local colorscheme = "tokyonight"
+
+--local colorscheme = "tokyonight"
+local colorscheme = "gruvbox"
+
 vim.cmd('colorscheme ' .. colorscheme)
 vim.g.mapleader = ","
 vim.opt.number = true
@@ -139,7 +133,7 @@ vim.opt.incsearch = true
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 --vim.opt.updatetime = 50
-vim.opt.colorcolumn = "140"
+--vim.opt.colorcolumn = "140"
 vim.cmd('set termguicolors')
 vim.cmd('syntax enable')
 vim.cmd('filetype on')
@@ -264,6 +258,21 @@ vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
 -- Format
 vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
 -------------------------------------------------------------------------------
+
+-- Harpoon
+-------------------------------------------------------------------------------
+require("harpoon").setup({
+    menu = {
+        width = vim.api.nvim_win_get_width(0) - 10,
+    }
+})
+
+local mark = require('harpoon.mark')
+local ui = require('harpoon.ui')
+
+vim.keymap.set('n', '<leader>af', mark.add_file)
+vim.keymap.set('n', '<leader>df', mark.rm_file)
+vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
 
 -- Utils
 -------------------------------------------------------------------------------
