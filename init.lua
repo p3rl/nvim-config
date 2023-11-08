@@ -117,6 +117,13 @@ require("tokyonight").setup({
     lualine_bold = false, -- When `true`, section headers in the lualine theme will be bold
 })
 
+-- Notes
+-------------------------------------------------------------------------------
+require('notes').setup({
+    root_path = "c:\\git\\docs",
+    path = "c:\\git\\docs\\ue\\2023.md",
+})
+
 -- Settings
 -------------------------------------------------------------------------------
 
@@ -166,9 +173,9 @@ vim.cmd [[command! FzfBuffers :lua require'fzf-cmds'.buffers()]]
 vim.cmd [[command! FzfTags :lua require'fzf-cmds'.tags()]]
 
 -- Notes
-vim.cmd([[command! Notes lua require'p3rl.notes'.open()]])
-vim.cmd([[command! SaveNotes lua require'p3rl.notes'.save()]])
-vim.cmd([[command! UpdateNotes lua require'p3rl.notes'.update()]])
+vim.cmd([[command! Notes lua require'notes'.open()]])
+vim.cmd([[command! SaveNotes lua require'notes'.save()]])
+vim.cmd([[command! UpdateNotes lua require'notes'.update()]])
 
 vim.cmd([[command! ReloadBuffer :e! %]])
 
