@@ -1,344 +1,295 @@
-local utils = require'utils'
-local map, opt, set_var, nvim_create_augroups = utils.map, utils.opt, utils.set_var, utils.create_augroups
-local cmd, fn, g, api = vim.cmd, vim.fn, vim.g, vim.api
+-- Plugin Manager
+-------------------------------------------------------------------------------
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+    vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable", -- latest stable release
+        lazypath,
+    })
+end
+vim.opt.rtp:prepend(lazypath)
+
+vim.g.mapleader = ","
+-------------------------------------------------------------------------------
 
 -- Plugins
 -------------------------------------------------------------------------------
-require "paq" {
-  'savq/paq-nvim';
-  'nvim-lua/popup.nvim';
-  'nvim-lua/plenary.nvim';
-  'MunifTanjim/nui.nvim';
-  'neovim/nvim-lspconfig';
-  'vijaymarupudi/nvim-fzf';
-  'hoob3rt/lualine.nvim';
-  'RishabhRD/popfix';
-  {'folke/tokyonight.nvim', branch = 'main'};
-  'ellisonleao/gruvbox.nvim'; 
-  'hrsh7th/nvim-cmp';
-  'hrsh7th/cmp-buffer';
-  'hrsh7th/cmp-nvim-lua';
-  'hrsh7th/cmp-nvim-lsp';
-  'delphinus/cmp-ctags';
-  'tpope/vim-fugitive';
-  {'nvim-neo-tree/neo-tree.nvim', branch = 'v2.x'};
---  'kyazdani42/nvim-tree.lua';
-  'rust-lang/rust.vim';
-}
+require("lazy").setup({
+    {"nvim-lua/plenary.nvim"},
+    {"theprimeagen/harpoon"},
+    {"folke/tokyonight.nvim", lazy = false},
+    {"ellisonleao/gruvbox.nvim", priority = 1000 , config = true, opts = {
+        terminal_colors = true, -- add neovim terminal colors
+        undercurl = true,
+        underline = true,
+        bold = true,
+        italic = {
+            strings = false,
+            emphasis = false,
+            comments = false,
+            operators = false,
+            folds = true,
+        },
+        strikethrough = true,
+        invert_selection = false,
+        invert_signs = false,
+        invert_tabline = false,
+        invert_intend_guides = false,
+        inverse = true, -- invert background for search, diffs, statuslines and errors
+        contrast = "hard", -- can be "hard", "soft" or empty string
+        palette_overrides = {},
+        overrides = {},
+        dim_inactive = false,
+        transparent_mode = false,
+    }},
+    {"vijaymarupudi/nvim-fzf", lazy = false},
+    {"VonHeikemen/lsp-zero.nvim",
+        branch = 'v2.x',
+        dependencies = {
+            -- LSP Support
+            {'neovim/nvim-lspconfig'},             -- Required
+            {'williamboman/mason.nvim'},           -- Optional
+            {'williamboman/mason-lspconfig.nvim'}, -- Optional
 
--- Local plugins
-package.loaded['fzf-cmds'] = nil
-package.loaded['p4'] = nil
-package.loaded['psue'] = nil
-package.loaded['grep'] = nil
-package.loaded['fastbuf'] = nil
-package.loaded['lsp'] = nil
-package.loaded['notes'] = nil
+            -- Autocompletion
+            {'hrsh7th/nvim-cmp'},     -- Required
+            {'hrsh7th/cmp-nvim-lsp'}, -- Required
+            {'L3MON4D3/LuaSnip'},     -- Required
+        }
+    }
+})
+-------------------------------------------------------------------------------
+
+-- Lsp
+-------------------------------------------------------------------------------
+require("mason").setup()
+local lsp = require('lsp-zero').preset({})
+lsp.setup_servers({'rust_analyzer'})
+lsp.on_attach(function(client, bufnr)
+    lsp.default_keymaps({buffer = bufnr})
+end)
+require('lspconfig').lua_ls.setup(lsp.nvim_lua_ls())
+lsp.setup()
+
+local cmp = require('cmp')
+local cmp_action = require('lsp-zero').cmp_action()
+cmp.setup({
+    mapping = {
+        -- `Enter` key to confirm
+        ['<CR>'] = cmp.mapping.confirm({select = false}),
+        -- Ctrl+Space to trigger completion menu
+        ['<C-Space>'] = cmp.mapping.complete(),
+        -- Navigate between snippet placeholder
+        ['<C-f>'] = cmp_action.luasnip_jump_forward(),
+        ['<C-b>'] = cmp_action.luasnip_jump_backward(),
+    }
+})
+-------------------------------------------------------------------------------
 
 -- Theme(s)
 -------------------------------------------------------------------------------
-require("gruvbox").setup({
-  undercurl = true,
-  underline = true,
-  bold = true,
-  italic = false,
-  strikethrough = true,
-  invert_selection = false,
-  invert_signs = false,
-  invert_tabline = false,
-  invert_intend_guides = true,
-  inverse = true, -- invert background for search, diffs, statuslines and errors
-  contrast = "hard", -- can be "hard", "soft" or empty string
-  palette_overrides = {},
-  overrides = {},
-  dim_inactive = false,
-  transparent_mode = false,
+require("tokyonight").setup({
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+    light_style = "day", -- The theme is used when the background is set to light
+    transparent = false, -- Enable this to disable setting the background color
+    terminal_colors = true, -- Configure the colors used when opening a `:terminal` in [Neovim](https://github.com/neovim/neovim)
+    styles = {
+        -- Style to be applied to different syntax groups
+        -- Value is any valid attr-list value for `:help nvim_set_hl`
+        comments = { italic = false },
+        keywords = { italic = false },
+        functions = { italic = false},
+        variables = { italic = false },
+        -- Background styles. Can be "dark", "transparent" or "normal"
+        sidebars = "dark", -- style for sidebars, see below
+        floats = "dark", -- style for floating windows
+    },
+    sidebars = { "qf", "help" }, -- Set a darker background on sidebar-like windows. For example: `["qf", "vista_kind", "terminal", "packer"]`
+    day_brightness = 0.3, -- Adjusts the brightness of the colors of the **Day** style. Number between 0 and 1, from dull to vibrant colors
+    hide_inactive_statusline = false, -- Enabling this option, will hide inactive statuslines and replace them with a thin border instead. Should work with the standard **StatusLine** and **LuaLine**.
+    dim_inactive = false, -- dims inactive windows
+    lualine_bold = false, -- When `true`, section headers in the lualine theme will be bold
 })
-
---local theme = { colorscheme = 'oh-lucy', background = 'dark', lualine_theme = 'oh-lucy'}
---local theme = { colorscheme = 'gruvbox', background = 'light', lualine_theme = 'gruvbox'}
-local theme = { colorscheme = 'tokyonight-night', background = 'dark', lualine_theme = 'tokyonight-night'}
-
-cmd('set termguicolors')
-cmd('set background=' .. theme.background)
-cmd('colorscheme ' .. theme.colorscheme)
-
--- Settings
--------------------------------------------------------------------------------
-cmd 'language en'
-cmd 'syntax enable'
-cmd 'filetype on'
-cmd 'set clipboard+=unnamedplus'
-cmd 'set noswapfile'
---cmd 'set listchars=space:_'
-set_var('mapleader', ',')
-
--- Tabs
--------------------------------------------------------------------------------
-local tabs = {
-  general = {
-    indent = 4,
-    spaces = false
-  },
-  lua = {
-    indent = 2,
-    spaces = true
-  },
-  ps1 = {
-    indent = 4,
-    spaces = true
-  },
-  psm1 = {
-    indent = 4,
-    spaces = true
-  },
-  psd1 = {
-    indent = 4,
-    spaces = true
-  },
-  rs = {
-    indent = 4,
-    spaces = true
-  },
-  js = {
-    indent = 4,
-    spaces = true
-  }
-}
-
-function set_filetype_tabs()
-  local settings = tabs[vim.bo.filetype]
-  if settings then
-    vim.bo.expandtab = settings.spaces
-    vim.bo.shiftwidth = settings.indent
-    vim.bo.tabstop = settings.indent
-    vim.bo.softtabstop = settings.indent
-  end
-end
-
--- Settings
--------------------------------------------------------------------------------
-opt('b', 'shiftwidth', tabs.general.indent)             -- Size of indent
-opt('b', 'tabstop', tabs.general.indent)                -- Number of spaces tabs count for
-opt('b', 'softtabstop', tabs.general.indent)            -- Number of spaces that a <Tab> counts for while performing editingoperations, like inserting a <Tab> or using <BS>
-opt('o', 'expandtab', tabs.general.spaces)              -- Spaces instead of tabs
-opt('b', 'autoindent', true)                            -- Copy indent from current line when starting a new line
-opt('b', 'smartindent', true)                           -- Do smart autoindenting when starting a new line
-opt('o', 'smarttab', true)                              -- When on, a <Tab> in front of a line inserts blanks according to
-opt('b', 'cindent', true)
-cmd 'set listchars=tab::.'                              -- Show tabs
-
-opt('o', 'ignorecase', true)                            --
-opt('o', 'incsearch', true)                             --
-opt('o', 'laststatus', 3)                               --
-opt('o', 'backup', false)                               --
-opt('o', 'swapfile', false)                             --
-opt('o', 'hidden', true)                                --
-opt('w', 'cursorline', true)                            -- Highlight current line
-opt('w', 'list', false)                                 -- Show some invisible characters (tabs...)
-opt('w', 'number', true)                                -- Print line number
-opt('w', 'relativenumber', false)                       -- Relative line numbers
-opt('w', 'wrap', false)                                 -- Disable wrapping
-opt('o', 'completeopt', 'menu,menuone,noselect')        -- Completion options
-opt('o', 'shiftround', true)                            -- Round indent
-opt('o', 'scrolloff', 4 )                               -- Lines of context
-opt('o', 'sidescrolloff', 8)                            -- Columns of context
-opt('o', 'smartcase', true)                             -- Don't ignore case with capitals
-opt('o', 'splitbelow', true)                            -- Put new windows below current
-opt('o', 'splitright', true)                            -- Put new windows right of current
-opt('o', 'termguicolors', true)                         -- True color support
-opt('o', 'wildmode', 'full')                            -- Command-line completion mode
---opt('o', 'ttyfast', true)                               -- Should make scrolling faster
---opt('o', 'lazyredraw', false)                            -- Same as above
-opt('w', 'foldmethod', 'syntax')                        -- Fold method
-opt('o', 'foldcolumn', '0')                             -- Fold columns
-opt('o', 'foldlevelstart', 99)                          -- Default fold level
-
--- Commands
--------------------------------------------------------------------------------
-cmd 'command! CopyPath :let @+= expand("%:p") | echo expand("%:p")'
-cmd 'command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")'
-cmd "command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))"
-cmd "command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))"
-cmd [[command! EditBuildConfig :exec printf(':e %s', 'C:\Users\per.larsson\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml')]]
-cmd [[command! UEquickfix :lua require'psue'.read_quickfix()]]
-cmd [[command! Notes lua require'notes'.open()]]
-cmd [[command! SaveNotes lua require'notes'.save()]]
-cmd [[command! UpdateNotes lua require'notes'.update()]]
-cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
-cmd [[command! ReloadBuffer :e! %]]
--- FastBuf
-cmd [[command! -nargs=0 FbPin lua require'fastbuf'.pin_buffer()]]
-cmd [[command! -nargs=0 FbUnpin lua require'fastbuf'.unpin_buffer()]]
-cmd [[command! -nargs=0 FbUnpinAll lua require'fastbuf'.unpin_all()]]
-cmd [[command! -nargs=0 FbSelectPinned lua require'fastbuf'.select_pinned_buffer()]]
-cmd [[command! -nargs=0 FbTogglePinned lua require'fastbuf'.toggle_pinned()]]
--- Perforce
-cmd [[command! -nargs=* P4init :lua require'p4'.init(<q-args>)]]
-cmd [[command! P4edit :lua require'p4'.edit()]]
-cmd [[command! P4revert :lua require'p4'.revert()]]
-cmd [[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]]
-cmd [[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]]
-cmd [[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]]
-cmd [[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]]
--- FZF
-cmd [[command! FzfFiles :lua require'fzf-cmds'.files()]]
-cmd [[command! FzfBuffers :lua require'fzf-cmds'.buffers()]]
-cmd [[command! FzfTags :lua require'fzf-cmds'.tags()]]
--- Lsp
-cmd [[command! -nargs=0 LspLog :lua vim.cmd('e '..vim.lsp.get_log_path())]]
-cmd [[command! -nargs=0 LspStop :lua require'lsp'.stop_all_clients()]]
---NvimTree
---map('n', '<F1>', '<cmd>NvimTreeToggle<CR>')
-
--- Mappings
--------------------------------------------------------------------------------
-map('n', '<F12>', '<cmd>execute printf(":tag %s", expand("<cword>"))<CR>')
-map('n', '<A-F11>', [[<cmd>luafile %<CR><cmd>echo '"' . expand("%:p") . '"' . " reloaded"<CR>]])
-map('n', '<C-F12>', '<cmd>EditConfig<CR>')
-map('n', '<C-s>', '<cmd>w<CR>')
-map('n', '<S-l>', '$')
-map('n', '<S-h>', '0')
-map('n', '<Esc>', '<cmd>noh<CR>')
-map('n', '<C-n>', '<cmd>b#<CR>')
-map('n', 'Y', 'y$')
-map('i', 'jj', '<ESC>')
-map('i', 'jk', '<ESC>')
-map('i', '{', '{}<Left>')
-map('i', '[', '[]<Left>')
-
--- File operations
-map('n', '<leader>f', '<cmd>FzfFiles<CR>')
-map('n', ';', '<cmd>FzfBuffers<CR>')
-map('n', '<leader>t', '<cmd>FzfTags<CR>')
-map('n', '<leader>pe', '<cmd>P4edit<CR>')
-map('n', '<leader>pr', '<cmd>P4revert<CR>')
-map('n', '<leader>cp', '<cmd>CopyPath<CR>')
-map('n', '<leader>cd', '<cmd>CopyDir<CR>')
-map('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
-
--- PSUE
-map('n', '<leader>qf', '<cmd>UEquickfix<CR>')
-
--- Quickfix
-map('n', '<A-h>', '<cmd>cfirst<CR>')
-map('n', '<A-j>', '<cmd>cn<CR>')
-map('n', '<A-k>', '<cmd>cp<CR>')
-map('n', '<leader>eo', '<cmd>copen 20<CR>')
-map('n', '<leader>ec', '<cmd>cclose<CR>')
-
--- Folding
-map('n', '<space>', 'za')
-map('n', '<C-space>', 'zR')
-map('n', '<S-space>', 'zM')
-
--- Search & Replace
-map('n', 'gw', '<cmd>vim <cword> %<CR>:copen<CR>')
-map('n', 'Gw', '<cmd>Grep <cword><CR>')
-map('n', 'S', [[:%s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
-map('n', 'R', [[:,$s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
-
--- Snippets
-map('i', '<F5>', "<C-R>=strftime('%c')<CR>")
-map('i', '<F9>', "UE_DISABLE_OPTIMIZATION")
-map('i', '<S-F9>', "UE_ENABLE_OPTIMIZATION")
-
--- Window
-map('n', '<A-Up>', '<cmd>resize +2<CR>')
-map('n', '<A-Down>', '<cmd>resize -2<CR>')
-map('n', '<A-Right>', '<cmd>vertical resize +2<CR>')
-map('n', '<A-Left>', '<cmd>vertical resize -2<CR>')
-
--- Lsp
-map('n', 'gd', '<cmd>lua vim.lsp.buf.declaration()<CR>')
-
--- Statusline
--------------------------------------------------------------------------------
-local function lualine_tab_info()
-  local indent = 'tabs'
-	if vim.bo.expandtab then
-	  indent = 'spaces'
-	end
-	return string.format('%s:%d', indent, vim.bo.shiftwidth)
-end
-
-require('lualine').setup {
-  options = { 
-    icons_enabled = false,
-    theme = theme.lualine_theme,
-    section_separators = {' ', ' '},
-    component_separators = {' ', ' '}
-  },
-  sections = {
-    lualine_a = { 'filename' },
-    lualine_b = {},
-    lualine_c = {},
-    lualine_x = {},
-    lualine_y = { require'lsp'.get_buf_client_name, 'encoding', 'fileformat', 'filetype', lualine_tab_info },
-    lualine_z = { 'location'  },
-  },
-  inactive_sections = {
-    lualine_a = {  },
-    lualine_b = {  },
-    lualine_c = { 'filename' },
-    lualine_x = { 'location' },
-    lualine_y = {  },
-    lualine_z = {   }
-  },
-  extensions = { 'fzf', 'quickfix', 'nvim-tree' }
-}
-
--- NeoTree
--------------------------------------------------------------------------------
-map('n', '<F1>', '<cmd>NeoTreeRevealToggle<CR>')
-map('n', '<F2>', '<cmd>NeoTreeFloatToggle<CR>')
-
--- NvimTree
--------------------------------------------------------------------------------
---require'nvim-tree'.setup {
---  disable_netrw       = true,
---  hijack_netrw        = false,
---  open_on_setup       = false,
---  ignore_ft_on_setup  = {},
---  open_on_tab         = false,
---  hijack_cursor       = false,
---  update_cwd          = false,
---  update_focused_file = {
---    enable      = true,
---    update_cwd  = false,
---    ignore_list = {}
---  },
---  view = {
---    width = 50,
---    side = 'left',
---    mappings = {
---      custom_only = false,
---      list = {}
---    }
---  }
---}
-
--- LSP
--------------------------------------------------------------------------------
-require'lsp'.setup()
 
 -- Notes
 -------------------------------------------------------------------------------
-require'notes'.setup{
-  root_path = "c:/git/docs",
-  path = "c:/git/docs/ue/2023.md"
-}
+require('notes').setup({
+    root_path = "c:\\git\\docs",
+    path = "c:\\git\\docs\\ue\\2023.md",
+})
 
---Terminal
+-- Settings
 -------------------------------------------------------------------------------
-map('t', '<Esc>', [[<C-\><C-n>]])
 
-local autocmds = {
-  terminal = {
-    { 'TermOpen', '*', 'startinsert' }
-  },
-  set_tabs = {
-    { 'FileType', '*', [[lua set_filetype_tabs()]] }
-  }
-}
-nvim_create_augroups(autocmds)
+--local colorscheme = "tokyonight"
+local colorscheme = "gruvbox"
+
+vim.cmd('colorscheme ' .. colorscheme)
+vim.g.mapleader = ","
+vim.opt.number = true
+vim.opt.relativenumber = false
+vim.opt.wrap = false
+vim.opt.hlsearch = true
+vim.opt.incsearch = true
+vim.opt.scrolloff = 8
+vim.opt.signcolumn = "yes"
+--vim.opt.updatetime = 50
+--vim.opt.colorcolumn = "140"
+vim.cmd('set termguicolors')
+vim.cmd('syntax enable')
+vim.cmd('filetype on')
+vim.cmd('set ignorecase')
+vim.cmd('set noswapfile')
+vim.cmd('set clipboard+=unnamedplus')
+vim.cmd('set splitright')
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.autoindent = true
+vim.opt.cindent = true
+
+-- Commands
+-------------------------------------------------------------------------------
+vim.cmd('command! CopyPath :let @+= expand("%:p") | echo expand("%:p")')
+vim.cmd('command! CopyDir :let @+= expand("%:p:h") | echo expand("%:p:h")')
+vim.cmd("command! EditConfig :exec printf(':e %s/init.lua', stdpath('config'))")
+vim.cmd("command! EditGConfig :exec printf(':e %s/ginit.vim', stdpath('config'))")
+vim.cmd([[command! EditBuildConfig :exec printf(':e %s', 'C:\Users\per.larsson\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml')]])
+
+-- Grep
+vim.cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
+
+-- Fzf
+vim.cmd [[command! FzfFiles :lua require'fzf-cmds'.files()]]
+vim.cmd [[command! FzfBuffers :lua require'fzf-cmds'.buffers()]]
+vim.cmd [[command! FzfTags :lua require'fzf-cmds'.tags()]]
+
+-- Notes
+vim.cmd([[command! Notes lua require'notes'.open()]])
+vim.cmd([[command! SaveNotes lua require'notes'.save()]])
+vim.cmd([[command! UpdateNotes lua require'notes'.update()]])
+
+vim.cmd([[command! ReloadBuffer :e! %]])
+
+-- Perforce
+vim.cmd([[command! -nargs=* P4init :lua require'p4'.init(<q-args>)]])
+vim.cmd([[command! P4edit :lua require'p4'.edit()]])
+vim.cmd([[command! P4revert :lua require'p4'.revert()]])
+vim.cmd([[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)]])
+vim.cmd([[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]])
+vim.cmd([[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]])
+vim.cmd([[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]])
+
+-- UE
+vim.api.nvim_create_user_command('UEquickfix',
+function()
+    require'utils'.read_quickfix()
+end,
+{})
+
+vim.api.nvim_create_user_command('TabSettings',
+function(opts)
+    print(string.format("<tabstop=%d>, <expandtab='%s'>", vim.bo.tabstop, tostring(vim.bo.expandtab)))
+end,
+{})
+
+vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+    pattern = '*',
+    callback = function(opts)
+        --require'p3rl.settings'.update_tabsettings(vim.bo.filetype)
+    end
+})
+
+-- Mappings
+-------------------------------------------------------------------------------
+vim.keymap.set('n', '<S-l>', '$')
+vim.keymap.set('n', '<S-h>', '0')
+vim.keymap.set("n", "<F1>", vim.cmd.Ex)
+vim.keymap.set("n", "<leader>s", ":w<CR>")
+
+vim.keymap.set("i", "jk", "<Esc>")
+vim.keymap.set("i", "jj", "<Esc>")
+
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+
+vim.keymap.set('i', '{', '{}<Left>')
+vim.keymap.set('i', '[', '[]<Left>')
+vim.keymap.set('n', '<Esc>', '<cmd>noh<CR>')
+vim.keymap.set('n', '<C-n>', '<cmd>b#<CR>')
+vim.keymap.set('n', 'Y', 'y$')
+
+-- Quckfix
+vim.keymap.set('n', '<A-h>', '<cmd>cfirst<CR>')
+vim.keymap.set('n', '<A-j>', '<cmd>cn<CR>')
+vim.keymap.set('n', '<A-k>', '<cmd>cp<CR>')
+
+-- Search
+vim.keymap.set('n', 'gw', '<cmd>vim <cword> %<CR>:copen<CR>')
+vim.keymap.set('n', 'Gw', '<cmd>Grep <cword><CR>')
+vim.keymap.set('n', 'S', [[:%s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
+vim.keymap.set('n', 'R', [[:,$s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
+vim.keymap.set('n', '<leader>ff', '<cmd>FzfFiles<CR>')
+vim.keymap.set('n', ';', '<cmd>FzfBuffers<CR>')
+
+-- General
+vim.keymap.set('n', '<leader>cp', '<cmd>CopyPath><CR>')
+
+-- Snippets
+vim.keymap.set('i', '<F5>', "<C-R>=strftime('%c')<CR>")
+vim.keymap.set('i', '<F9>', "UE_DISABLE_OPTIMIZATION")
+vim.keymap.set('i', '<S-F9>', "UE_ENABLE_OPTIMIZATION")
+
+-- Copy
+vim.keymap.set('n', '<leader>cp', '<cmd>CopyPath<CR>')
+vim.keymap.set('n', '<leader>cd', '<cmd>CopyDir<CR>')
+
+-- UE Quckfix
+vim.keymap.set('n', '<leader>qf', '<cmd>UEquickfix<CR>')
+
+-- Perforce
+vim.keymap.set('n', '<leader>ef', '<cmd>P4edit<CR>')
+vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
+
+-- Format
+vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
+-------------------------------------------------------------------------------
+
+-- Harpoon
+-------------------------------------------------------------------------------
+require("harpoon").setup({
+    menu = {
+        width = vim.api.nvim_win_get_width(0) - 10,
+    }
+})
+
+local mark = require('harpoon.mark')
+local ui = require('harpoon.ui')
+
+vim.keymap.set('n', '<leader>af', mark.add_file)
+vim.keymap.set('n', '<leader>df', mark.rm_file)
+vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
+
+-- Utils
+-------------------------------------------------------------------------------
+function _G.dump(...)
+    local objects = vim.tbl_map(vim.inspect, {...})
+    print(unpack(objects))
+end
+
+function _G.rerequire(module_name)
+  package.loaded[module_name] = nil
+  return require(module_name)
+end
+-------------------------------------------------------------------------------
