@@ -48,7 +48,7 @@ require("lazy").setup({
     }},
     {"vijaymarupudi/nvim-fzf", lazy = false},
     {"VonHeikemen/lsp-zero.nvim",
-        branch = 'v2.x',
+        branch = 'v4.x',
         dependencies = {
             -- LSP Support
             {'neovim/nvim-lspconfig'},             -- Required
@@ -67,17 +67,28 @@ require("lazy").setup({
 -- Lsp
 -------------------------------------------------------------------------------
 require("mason").setup()
-local lsp = require('lsp-zero').preset({})
-lsp.setup_servers({'rust_analyzer'})
-lsp.on_attach(function(client, bufnr)
-    lsp.default_keymaps({buffer = bufnr})
-end)
-require('lspconfig').lua_ls.setup(lsp.nvim_lua_ls())
-lsp.setup()
+
+local lsp_zero = require("lsp-zero")
+
+local lsp_attach = function(client, bufnr)
+  -- see :help lsp-zero-keybindings
+  -- to learn the available actions
+  lsp_zero.default_keymaps({buffer = bufnr})
+end
+
+lsp_zero.extend_lspconfig({
+    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    lsp_attach = lsp_attach,
+    float_border = "rounded",
+    sign_text = true
+})
 
 local cmp = require('cmp')
 local cmp_action = require('lsp-zero').cmp_action()
 cmp.setup({
+    sources = {
+        {name = 'nvim_lsp'},
+    },
     mapping = {
         -- `Enter` key to confirm
         ['<CR>'] = cmp.mapping.confirm({select = false}),
@@ -88,6 +99,12 @@ cmp.setup({
         ['<C-b>'] = cmp_action.luasnip_jump_backward(),
     }
 })
+
+require('lspconfig').clangd.setup({})
+require('lspconfig').lua_ls.setup({})
+require('lspconfig').rust_analyzer.setup({})
+require('lspconfig').pylsp.setup({})
+
 -------------------------------------------------------------------------------
 
 -- Theme
@@ -95,7 +112,7 @@ cmp.setup({
 require("tokyonight").setup({
     -- your configuration comes here
     -- or leave it empty to use the default settings
-    style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+    style = "moon", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
     light_style = "day", -- The theme is used when the background is set to light
     transparent = false, -- Enable this to disable setting the background color
     terminal_colors = true, -- Configure the colors used when opening a `:terminal` in [Neovim](https://github.com/neovim/neovim)
@@ -121,14 +138,14 @@ require("tokyonight").setup({
 -------------------------------------------------------------------------------
 require('notes').setup({
     root_path = "c:\\git\\docs",
-    path = "c:\\git\\docs\\ue\\2023.md",
+    path = "c:\\git\\docs\\ue\\2024.md",
 })
 
 -- Settings
 -------------------------------------------------------------------------------
 
---local colorscheme = "tokyonight"
-local colorscheme = "gruvbox"
+local colorscheme = "tokyonight"
+--local colorscheme = "gruvbox"
 
 vim.cmd('colorscheme ' .. colorscheme)
 vim.g.mapleader = ","
@@ -241,6 +258,7 @@ vim.keymap.set('n', 'Gw', '<cmd>Grep <cword><CR>')
 vim.keymap.set('n', 'S', [[:%s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
 vim.keymap.set('n', 'R', [[:,$s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword>')<CR>/gc<Left><Left><Left>]])
 vim.keymap.set('n', '<leader>ff', '<cmd>FzfFiles<CR>')
+vim.keymap.set('n', '<leader>ft', '<cmd>FzfTags<CR>')
 vim.keymap.set('n', ';', '<cmd>FzfBuffers<CR>')
 
 -- General
@@ -264,6 +282,10 @@ vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
 
 -- Format
 vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
+
+-- Tags
+vim.keymap.set('n', '<F12>', [[<cmd>execute printf(":tag %s", expand("<cword>"))<CR>]])
+
 -------------------------------------------------------------------------------
 
 -- Harpoon
