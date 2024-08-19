@@ -69,6 +69,7 @@ require("lazy").setup({
 require("mason").setup()
 
 local lsp_zero = require("lsp-zero")
+local cmp_action = require('lsp-zero').cmp_action()
 
 local lsp_attach = function(client, bufnr)
   -- see :help lsp-zero-keybindings
@@ -86,10 +87,23 @@ lsp_zero.extend_lspconfig({
 local cmp = require('cmp')
 local cmp_action = require('lsp-zero').cmp_action()
 cmp.setup({
+    snippet = {
+      expand = function(args)
+        --vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        --require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+      end
+    },
     sources = {
         {name = 'nvim_lsp'},
+        {name = 'buffer'}
     },
     mapping = {
+        -- Navigate between completion items
+        ['<C-p>'] = cmp.mapping.select_prev_item({behavior = 'select'}),
+        ['<C-n>'] = cmp.mapping.select_next_item({behavior = 'select'}),
         -- `Enter` key to confirm
         ['<CR>'] = cmp.mapping.confirm({select = false}),
         -- Ctrl+Space to trigger completion menu
