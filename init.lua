@@ -20,7 +20,12 @@ vim.g.mapleader = ","
 -------------------------------------------------------------------------------
 require("lazy").setup({
     {"nvim-lua/plenary.nvim"},
-    {"theprimeagen/harpoon"},
+    {"theprimeagen/harpoon",
+        branch = "harpoon2",
+        dependencies = {
+            {"nvim-lua/plenary.nvim"}
+        }
+    },
     {"folke/tokyonight.nvim", lazy = false},
     {"ellisonleao/gruvbox.nvim", priority = 1000 , config = true, opts = {
         terminal_colors = true, -- add neovim terminal colors
@@ -105,7 +110,7 @@ cmp.setup({
         ['<C-p>'] = cmp.mapping.select_prev_item({behavior = 'select'}),
         ['<C-n>'] = cmp.mapping.select_next_item({behavior = 'select'}),
         -- `Enter` key to confirm
-        ['<CR>'] = cmp.mapping.confirm({select = false}),
+        ['<CR>'] = cmp.mapping.confirm({select = true}),
         -- Ctrl+Space to trigger completion menu
         ['<C-Space>'] = cmp.mapping.complete(),
         -- Navigate between snippet placeholder
@@ -152,14 +157,14 @@ require("tokyonight").setup({
 -------------------------------------------------------------------------------
 require('notes').setup({
     root_path = "c:\\git\\docs",
-    path = "c:\\git\\docs\\ue\\2024.md",
+    path = "c:\\git\\docs\\ue\\2025.md",
 })
 
 -- Settings
 -------------------------------------------------------------------------------
 
-local colorscheme = "tokyonight"
---local colorscheme = "gruvbox"
+--local colorscheme = "tokyonight"
+local colorscheme = "default"
 
 vim.cmd('colorscheme ' .. colorscheme)
 vim.g.mapleader = ","
@@ -254,6 +259,9 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-f>", "<C-f>zz")
+vim.keymap.set("n", "[[", "[[zz")
+vim.keymap.set("n", "]]", "]]zz")
 
 vim.keymap.set('i', '{', '{}<Left>')
 vim.keymap.set('i', '[', '[]<Left>')
@@ -274,12 +282,15 @@ vim.keymap.set('n', 'R', [[:,$s/<C-R>=expand('<cword>')<CR>/<C-R>=expand('<cword
 vim.keymap.set('n', '<leader>ff', '<cmd>FzfFiles<CR>')
 vim.keymap.set('n', '<leader>ft', '<cmd>FzfTags<CR>')
 vim.keymap.set('n', ';', '<cmd>FzfBuffers<CR>')
+--vim.keymap.set('n', 'n', 'nzz')
+--vim.keymap.set('n', 'N', 'Nzz')
 
 -- General
 vim.keymap.set('n', '<leader>cp', '<cmd>CopyPath><CR>')
 
 -- Snippets
-vim.keymap.set('i', '<F5>', "<C-R>=strftime('%c')<CR>")
+vim.keymap.set('i', '<F5>', "<C-R>=strftime('%Y-%m-%d %H:%M')<CR>")
+vim.keymap.set('i', '<S-F5>', "<C-R>=strftime('%a %d/%m %H:%M')<CR>")
 vim.keymap.set('i', '<F9>', "UE_DISABLE_OPTIMIZATION")
 vim.keymap.set('i', '<S-F9>', "UE_ENABLE_OPTIMIZATION")
 
@@ -293,6 +304,8 @@ vim.keymap.set('n', '<leader>qf', '<cmd>UEquickfix<CR>')
 -- Perforce
 vim.keymap.set('n', '<leader>ef', '<cmd>P4edit<CR>')
 vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
+vim.keymap.set('n', '<C-F9>', '<cmd>P4revgraph<CR>')
+vim.keymap.set('n', '<C-F10>', '<cmd>P4timelaps<CR>')
 
 -- Format
 vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
@@ -304,18 +317,37 @@ vim.keymap.set('n', '<F12>', [[<cmd>execute printf(":tag %s", expand("<cword>"))
 
 -- Harpoon
 -------------------------------------------------------------------------------
-require("harpoon").setup({
-    menu = {
-        width = vim.api.nvim_win_get_width(0) - 10,
+local harpoon = require("harpoon")
+harpoon:setup({
+    settings = {
+        save_on_toggle = true,
+        save_on_ui_close = true
     }
 })
+vim.keymap.set("n", "<leader>af", function() harpoon:list():add() end)
+vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
 
-local mark = require('harpoon.mark')
-local ui = require('harpoon.ui')
+vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
+vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
+--vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
+--vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
 
-vim.keymap.set('n', '<leader>af', mark.add_file)
-vim.keymap.set('n', '<leader>df', mark.rm_file)
-vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
+-- Toggle previous & next buffers stored within Harpoon list
+--vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
+--vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
+
+--require("harpoon").setup({
+--    menu = {
+--        width = vim.api.nvim_win_get_width(0) - 10,
+--    }
+--})
+--
+--local mark = require('harpoon.mark')
+--local ui = require('harpoon.ui')
+--
+--vim.keymap.set('n', '<leader>af', mark.add_file)
+--vim.keymap.set('n', '<leader>df', mark.rm_file)
+--vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
 
 -- Utils
 -------------------------------------------------------------------------------
