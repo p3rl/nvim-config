@@ -19,52 +19,56 @@ vim.g.mapleader = ","
 -- Plugins
 -------------------------------------------------------------------------------
 require("lazy").setup({
-    {"nvim-lua/plenary.nvim"},
-    {"theprimeagen/harpoon",
+    { "williamboman/mason.nvim" },
+    { "neovim/nvim-lspconfig" },
+    { "nvim-lua/plenary.nvim" },
+    {
+        "theprimeagen/harpoon",
         branch = "harpoon2",
         dependencies = {
             {"nvim-lua/plenary.nvim"}
         }
     },
-    {"folke/tokyonight.nvim", lazy = false},
-    {"ellisonleao/gruvbox.nvim", priority = 1000 , config = true, opts = {
-        terminal_colors = true, -- add neovim terminal colors
-        undercurl = true,
-        underline = true,
-        bold = true,
-        italic = {
-            strings = false,
-            emphasis = false,
-            comments = false,
-            operators = false,
-            folds = true,
-        },
-        strikethrough = true,
-        invert_selection = false,
-        invert_signs = false,
-        invert_tabline = false,
-        invert_intend_guides = false,
-        inverse = true, -- invert background for search, diffs, statuslines and errors
-        contrast = "hard", -- can be "hard", "soft" or empty string
-        palette_overrides = {},
-        overrides = {},
-        dim_inactive = false,
-        transparent_mode = false,
-    }},
-    {"vijaymarupudi/nvim-fzf", lazy = false},
-    {"VonHeikemen/lsp-zero.nvim",
-        branch = 'v4.x',
-        dependencies = {
-            -- LSP Support
-            {'neovim/nvim-lspconfig'},             -- Required
-            {'williamboman/mason.nvim'},           -- Optional
-            {'williamboman/mason-lspconfig.nvim'}, -- Optional
-
-            -- Autocompletion
-            {'hrsh7th/nvim-cmp'},     -- Required
-            {'hrsh7th/cmp-nvim-lsp'}, -- Required
-            {'L3MON4D3/LuaSnip'},     -- Required
+    { "folke/tokyonight.nvim", lazy = false },
+    {
+        "ellisonleao/gruvbox.nvim",
+        priority = 1000,
+        config = true,
+        opts = {
+            terminal_colors = true, -- add neovim terminal colors
+            undercurl = true,
+            underline = true,
+            bold = true,
+            italic = {
+                strings = false,
+                emphasis = false,
+                comments = false,
+                operators = false,
+                folds = true,
+            },
+            strikethrough = true,
+            invert_selection = false,
+            invert_signs = false,
+            invert_tabline = false,
+            invert_intend_guides = false,
+            inverse = true, -- invert background for search, diffs, statuslines and errors
+            contrast = "hard", -- can be "hard", "soft" or empty string
+            palette_overrides = {},
+            overrides = {},
+            dim_inactive = false,
+            transparent_mode = false,
         }
+    },
+    { "vijaymarupudi/nvim-fzf", lazy = false },
+    {
+        "saghen/blink.cmp",
+        lazy = false,
+        version = "1.*",
+        dependencies = { "rafamadriz/friendly-snippets" },
+        opts = {
+            keymap = { preset = "default" }
+        },
+        sources = { "lsp", "buffer" }
     }
 })
 -------------------------------------------------------------------------------
@@ -73,56 +77,41 @@ require("lazy").setup({
 -------------------------------------------------------------------------------
 require("mason").setup()
 
-local lsp_zero = require("lsp-zero")
-local cmp_action = require('lsp-zero').cmp_action()
-
-local lsp_attach = function(client, bufnr)
-  -- see :help lsp-zero-keybindings
-  -- to learn the available actions
-  lsp_zero.default_keymaps({buffer = bufnr})
-end
-
-lsp_zero.extend_lspconfig({
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
-    lsp_attach = lsp_attach,
-    float_border = "rounded",
-    sign_text = true
-})
-
-local cmp = require('cmp')
-local cmp_action = require('lsp-zero').cmp_action()
-cmp.setup({
-    snippet = {
-      expand = function(args)
-        --vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-        --require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-        vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
-      end
-    },
-    sources = {
-        {name = 'nvim_lsp'},
-        {name = 'buffer'}
-    },
-    mapping = {
-        -- Navigate between completion items
-        ['<C-p>'] = cmp.mapping.select_prev_item({behavior = 'select'}),
-        ['<C-n>'] = cmp.mapping.select_next_item({behavior = 'select'}),
-        -- `Enter` key to confirm
-        ['<CR>'] = cmp.mapping.confirm({select = true}),
-        -- Ctrl+Space to trigger completion menu
-        ['<C-Space>'] = cmp.mapping.complete(),
-        -- Navigate between snippet placeholder
-        ['<C-f>'] = cmp_action.luasnip_jump_forward(),
-        ['<C-b>'] = cmp_action.luasnip_jump_backward(),
+vim.lsp.config['lua_ls'] = {
+      -- Command and arguments to start the server.
+    cmd = { 'lua-language-server' },
+    -- Filetypes to automatically attach to.
+    filetypes = { 'lua' },
+    -- Sets the "workspace" to the directory where any of these files is found.
+    -- Files that share a root directory will reuse the LSP server connection.
+    -- Nested lists indicate equal priority, see |vim.lsp.Config|.
+    root_markers = { { '.luarc.json', '.luarc.jsonc' }, '.git' },
+    -- Specific settings to send to the server. The schema is server-defined.
+    -- Example: https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json
+    settings = {
+        Lua = {
+            runtime = {
+                version = 'LuaJIT',
+            }
+        }
     }
-})
+}
 
-require('lspconfig').clangd.setup({})
-require('lspconfig').lua_ls.setup({})
-require('lspconfig').rust_analyzer.setup({})
-require('lspconfig').pylsp.setup({})
+vim.lsp.config['clangd'] = {
+      -- Command and arguments to start the server.
+    cmd = { 'clangd' },
+    -- Filetypes to automatically attach to.
+    filetypes = { 'cpp' },
+    root_markers = { { '.p4config' }, '.git' },
+}
+
+vim.lsp.enable('clangd')
+vim.lsp.enable('lua_ls')
+
+--require('lspconfig').clangd.setup({})
+--require('lspconfig').lua_ls.setup({})
+--require('lspconfig').rust_analyzer.setup({})
+--require('lspconfig').pylsp.setup({})
 
 -------------------------------------------------------------------------------
 
@@ -269,7 +258,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>noh<CR>')
 vim.keymap.set('n', '<C-n>', '<cmd>b#<CR>')
 vim.keymap.set('n', 'Y', 'y$')
 
--- Quckfix
+-- Quickfix
 vim.keymap.set('n', '<A-h>', '<cmd>cfirst<CR>')
 vim.keymap.set('n', '<A-j>', '<cmd>cn<CR>')
 vim.keymap.set('n', '<A-k>', '<cmd>cp<CR>')
