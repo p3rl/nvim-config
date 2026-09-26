@@ -16,6 +16,7 @@ end
 
 function Notes.save()
     local path = Notes.config.root_path
+    print(vim.fn.system('git ' .. string.format("-C %s add .", path)))
     print(vim.fn.system('git ' .. string.format("-C %s commit -a -m %s", path, "Update")))
     print(vim.fn.system('git ' .. string.format("-C %s push", path)))
 end

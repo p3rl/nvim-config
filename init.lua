@@ -52,7 +52,7 @@ require("lazy").setup({
             invert_tabline = false,
             invert_intend_guides = false,
             inverse = true, -- invert background for search, diffs, statuslines and errors
-            contrast = "hard", -- can be "hard", "soft" or empty string
+            contrast = "", -- can be "hard", "soft" or empty string
             palette_overrides = {},
             overrides = {},
             dim_inactive = false,
@@ -66,9 +66,14 @@ require("lazy").setup({
         version = "1.*",
         dependencies = { "rafamadriz/friendly-snippets" },
         opts = {
-            keymap = { preset = "default" }
-        },
-        sources = { "lsp", "buffer" }
+            keymap = {
+                ['<CR>'] = { 'accept', 'fallback' },
+                completion = { menu = { auto_show = true } },
+            },
+            sources = {
+                default = { "lsp", "buffer" }
+            }
+        }
     }
 })
 -------------------------------------------------------------------------------
@@ -101,17 +106,19 @@ vim.lsp.config['clangd'] = {
       -- Command and arguments to start the server.
     cmd = { 'clangd' },
     -- Filetypes to automatically attach to.
-    filetypes = { 'cpp' },
+    filetypes = { 'h', 'inl', 'cpp' },
     root_markers = { { '.p4config' }, '.git' },
+}
+
+vim.lsp.config['csharp-ls'] = {
+    cmd = { 'csharp-ls' },
+    filetypes = { 'cs' },
+    root_markers = { { '.p4config' }, '.git', '.slnx' }
 }
 
 vim.lsp.enable('clangd')
 vim.lsp.enable('lua_ls')
-
---require('lspconfig').clangd.setup({})
---require('lspconfig').lua_ls.setup({})
---require('lspconfig').rust_analyzer.setup({})
---require('lspconfig').pylsp.setup({})
+vim.lsp.enable('csharp-ls')
 
 -------------------------------------------------------------------------------
 
@@ -120,7 +127,7 @@ vim.lsp.enable('lua_ls')
 require("tokyonight").setup({
     -- your configuration comes here
     -- or leave it empty to use the default settings
-    style = "moon", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+    style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
     light_style = "day", -- The theme is used when the background is set to light
     transparent = false, -- Enable this to disable setting the background color
     terminal_colors = true, -- Configure the colors used when opening a `:terminal` in [Neovim](https://github.com/neovim/neovim)
@@ -146,17 +153,18 @@ require("tokyonight").setup({
 -------------------------------------------------------------------------------
 require('notes').setup({
     root_path = "c:\\git\\docs",
-    path = "c:\\git\\docs\\ue\\2025.md",
+    path = "c:\\git\\docs\\ue\\2026.md",
 })
 
 -- Settings
 -------------------------------------------------------------------------------
 
 --local colorscheme = "tokyonight"
-local colorscheme = "default"
+local colorscheme = "gruvbox"
 
 vim.cmd('colorscheme ' .. colorscheme)
-vim.g.mapleader = ","
+vim.cmd('set background=light')
+
 vim.opt.number = true
 vim.opt.relativenumber = false
 vim.opt.wrap = false
@@ -226,13 +234,6 @@ function(opts)
 end,
 {})
 
-vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
-    pattern = '*',
-    callback = function(opts)
-        --require'p3rl.settings'.update_tabsettings(vim.bo.filetype)
-    end
-})
-
 -- Mappings
 -------------------------------------------------------------------------------
 vim.keymap.set('n', '<S-l>', '$')
@@ -274,12 +275,9 @@ vim.keymap.set('n', ';', '<cmd>FzfBuffers<CR>')
 --vim.keymap.set('n', 'n', 'nzz')
 --vim.keymap.set('n', 'N', 'Nzz')
 
--- General
-vim.keymap.set('n', '<leader>cp', '<cmd>CopyPath><CR>')
-
 -- Snippets
-vim.keymap.set('i', '<F5>', "<C-R>=strftime('%Y-%m-%d %H:%M')<CR>")
-vim.keymap.set('i', '<S-F5>', "<C-R>=strftime('%a %d/%m %H:%M')<CR>")
+vim.keymap.set('i', '<F3>', "<C-R>=strftime('%Y-%m-%d %H:%M')<CR>")
+vim.keymap.set('i', '<S-F3>', "<C-R>=strftime('%a %d/%m')<CR>")
 vim.keymap.set('i', '<F9>', "UE_DISABLE_OPTIMIZATION")
 vim.keymap.set('i', '<S-F9>', "UE_ENABLE_OPTIMIZATION")
 
@@ -294,7 +292,7 @@ vim.keymap.set('n', '<leader>qf', '<cmd>UEquickfix<CR>')
 vim.keymap.set('n', '<leader>ef', '<cmd>P4edit<CR>')
 vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
 vim.keymap.set('n', '<C-F9>', '<cmd>P4revgraph<CR>')
-vim.keymap.set('n', '<C-F10>', '<cmd>P4timelaps<CR>')
+vim.keymap.set('n', '<C-F10>', '<cmd>P4timelapse<CR>')
 
 -- Format
 vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
@@ -318,26 +316,6 @@ vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:lis
 
 vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
 vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
---vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
---vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
-
--- Toggle previous & next buffers stored within Harpoon list
---vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
---vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
-
---require("harpoon").setup({
---    menu = {
---        width = vim.api.nvim_win_get_width(0) - 10,
---    }
---})
---
---local mark = require('harpoon.mark')
---local ui = require('harpoon.ui')
---
---vim.keymap.set('n', '<leader>af', mark.add_file)
---vim.keymap.set('n', '<leader>df', mark.rm_file)
---vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
-
 -- Utils
 -------------------------------------------------------------------------------
 function _G.dump(...)
