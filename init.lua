@@ -118,7 +118,7 @@ vim.lsp.config['csharp-ls'] = {
 
 vim.lsp.enable('clangd')
 vim.lsp.enable('lua_ls')
-vim.lsp.enable('csharp-ls')
+--vim.lsp.enable('csharp-ls')
 
 -------------------------------------------------------------------------------
 
