@@ -1,7 +1,7 @@
 -- Plugin Manager
 -------------------------------------------------------------------------------
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -21,7 +21,6 @@ vim.g.mapleader = ","
 require("lazy").setup({
     { "williamboman/mason.nvim" },
     { "neovim/nvim-lspconfig" },
-    { "nvim-lua/plenary.nvim" },
     {
         "theprimeagen/harpoon",
         branch = "harpoon2",
@@ -64,14 +63,23 @@ require("lazy").setup({
         "saghen/blink.cmp",
         lazy = false,
         version = "1.*",
-        dependencies = { "rafamadriz/friendly-snippets" },
         opts = {
+            enabled = function()
+                return not vim.tbl_contains({ 'markdown', 'text' }, vim.bo.filetype)
+            end,
             keymap = {
+                preset = 'default',
                 ['<CR>'] = { 'accept', 'fallback' },
-                completion = { menu = { auto_show = true } },
+                ['<C-j>'] = { 'select_next', 'fallback' },
+                ['<C-k>'] = { 'select_prev', 'fallback' },
             },
+            completion = {
+                documentation = { auto_show = true, auto_show_delay_ms = 300 },
+                list = { selection = { preselect = true, auto_insert = false } },
+            },
+            signature = { enabled = true },
             sources = {
-                default = { "lsp", "buffer" }
+                default = { "lsp", "path", "buffer" }
             }
         }
     }
@@ -97,28 +105,78 @@ vim.lsp.config['lua_ls'] = {
         Lua = {
             runtime = {
                 version = 'LuaJIT',
+            },
+            workspace = {
+                library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false,
             }
         }
     }
 }
 
+-- Advertise blink.cmp's completion capabilities to every server.
+vim.lsp.config('*', {
+    capabilities = require('blink.cmp').get_lsp_capabilities(),
+})
+
 vim.lsp.config['clangd'] = {
-      -- Command and arguments to start the server.
-    cmd = { 'clangd' },
-    -- Filetypes to automatically attach to.
-    filetypes = { 'h', 'inl', 'cpp' },
-    root_markers = { { '.p4config' }, '.git' },
+    cmd = {
+        'clangd',
+        '--background-index',
+        '--background-index-priority=low',
+        '--clang-tidy=false',
+        '--completion-style=detailed',
+        '--header-insertion=never',
+        '--pch-storage=memory',
+        '--limit-results=200',
+        '-j=8',
+    },
+    filetypes = { 'c', 'cpp' },
+    -- compile_commands.json / .clangd first so the index follows the compile database.
+    root_markers = { { 'compile_commands.json', '.clangd' }, { '.p4config' }, '.git' },
 }
 
 vim.lsp.config['csharp-ls'] = {
     cmd = { 'csharp-ls' },
     filetypes = { 'cs' },
-    root_markers = { { '.p4config' }, '.git', '.slnx' }
+    root_markers = { { '.p4config' }, '.git' }
 }
 
 vim.lsp.enable('clangd')
 vim.lsp.enable('lua_ls')
 --vim.lsp.enable('csharp-ls')
+
+-- Buffer-local navigation keys, set when a server attaches.
+-- Neovim already provides: K hover, grn rename, gra code action, grr references,
+-- gri implementation, gO document symbols, [d / ]d diagnostics, <C-]> (via tagfunc).
+vim.api.nvim_create_autocmd('LspAttach', {
+    group = vim.api.nvim_create_augroup('UserLspKeys', { clear = true }),
+    callback = function(args)
+        local function map(lhs, rhs, desc)
+            vim.keymap.set('n', lhs, rhs, { buffer = args.buf, desc = desc })
+        end
+
+        map('gd', vim.lsp.buf.definition, 'LSP: go to definition')
+        map('gD', vim.lsp.buf.declaration, 'LSP: go to declaration')
+        map('gt', vim.lsp.buf.type_definition, 'LSP: go to type definition')
+
+        map('<leader>rn', vim.lsp.buf.rename, 'LSP: rename')
+        map('<leader>ca', vim.lsp.buf.code_action, 'LSP: code action')
+
+        map('<leader>fs', vim.lsp.buf.document_symbol, 'LSP: document symbols')
+        map('<leader>fS', vim.lsp.buf.workspace_symbol, 'LSP: workspace symbols')
+        map('<leader>ci', vim.lsp.buf.incoming_calls, 'LSP: incoming calls')
+        map('<leader>co', vim.lsp.buf.outgoing_calls, 'LSP: outgoing calls')
+
+        map('<leader>e', vim.diagnostic.open_float, 'Diagnostics: show line')
+        map('<leader>dq', vim.diagnostic.setqflist, 'Diagnostics: to quickfix')
+
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client and client.name == 'clangd' then
+            map('<leader>h', '<cmd>LspClangdSwitchSourceHeader<CR>', 'clangd: switch source/header')
+        end
+    end,
+})
 
 -------------------------------------------------------------------------------
 
@@ -162,8 +220,8 @@ require('notes').setup({
 --local colorscheme = "tokyonight"
 local colorscheme = "gruvbox"
 
+vim.opt.background = "light"
 vim.cmd('colorscheme ' .. colorscheme)
-vim.cmd('set background=light')
 
 vim.opt.number = true
 vim.opt.relativenumber = false
@@ -174,9 +232,6 @@ vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 --vim.opt.updatetime = 50
 --vim.opt.colorcolumn = "140"
-vim.cmd('set termguicolors')
-vim.cmd('syntax enable')
-vim.cmd('filetype on')
 vim.cmd('set ignorecase')
 vim.cmd('set noswapfile')
 vim.cmd('set clipboard+=unnamedplus')
@@ -185,7 +240,6 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
-vim.opt.smartindent = true
 vim.opt.autoindent = true
 vim.opt.cindent = true
 
@@ -222,6 +276,12 @@ vim.cmd([[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]])
 vim.cmd([[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]])
 
 -- UE
+vim.api.nvim_create_user_command('UEctags',
+function(opts)
+    require'ctags'.generate(opts.fargs)
+end,
+{ nargs = '*', complete = 'dir' })
+
 vim.api.nvim_create_user_command('UEquickfix',
 function()
     require'utils'.read_quickfix()
@@ -295,7 +355,10 @@ vim.keymap.set('n', '<C-F9>', '<cmd>P4revgraph<CR>')
 vim.keymap.set('n', '<C-F10>', '<cmd>P4timelapse<CR>')
 
 -- Format
-vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
+vim.keymap.set('n', '<leader>w', function()
+    vim.lsp.buf.format({ async = false })
+    vim.cmd.write()
+end)
 
 -- Tags
 vim.keymap.set('n', '<F12>', [[<cmd>execute printf(":tag %s", expand("<cword>"))<CR>]])
