@@ -1,8 +1,8 @@
 if exists('g:GuiLoaded')
 
-GuiTabline 0
-GuiPopupmenu 0
-GuiFont! JetBrains\ Mono:h10
+"GuiTabline 0
+"GuiPopupmenu 0
+"GuiFont! JetBrains\ Mono:h10
 "GuiFont! JetBrains\ Mono\ NL:h9
 "GuiFont! JetBrainsMono\ NF:h10
 "GuiFont! FiraCode\ NF:h9

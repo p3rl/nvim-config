@@ -1,7 +1,7 @@
 -- Plugin Manager
 -------------------------------------------------------------------------------
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -21,7 +21,6 @@ vim.g.mapleader = ","
 require("lazy").setup({
     { "williamboman/mason.nvim" },
     { "neovim/nvim-lspconfig" },
-    { "nvim-lua/plenary.nvim" },
     {
         "theprimeagen/harpoon",
         branch = "harpoon2",
@@ -52,7 +51,7 @@ require("lazy").setup({
             invert_tabline = false,
             invert_intend_guides = false,
             inverse = true, -- invert background for search, diffs, statuslines and errors
-            contrast = "hard", -- can be "hard", "soft" or empty string
+            contrast = "", -- can be "hard", "soft" or empty string
             palette_overrides = {},
             overrides = {},
             dim_inactive = false,
@@ -64,7 +63,6 @@ require("lazy").setup({
         "saghen/blink.cmp",
         lazy = false,
         version = "1.*",
-        dependencies = { "rafamadriz/friendly-snippets" },
         opts = {
             -- Tab accepts the selected (or first) item and jumps through snippet
             -- placeholders; Ctrl-n/Ctrl-p move the selection.
@@ -118,17 +116,41 @@ vim.lsp.config['lua_ls'] = {
         Lua = {
             runtime = {
                 version = 'LuaJIT',
+            },
+            workspace = {
+                library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false,
             }
         }
     }
 }
 
+-- Advertise blink.cmp's completion capabilities to every server.
+vim.lsp.config('*', {
+    capabilities = require('blink.cmp').get_lsp_capabilities(),
+})
+
 vim.lsp.config['clangd'] = {
-      -- Command and arguments to start the server.
-    cmd = { 'clangd' },
-    -- Filetypes to automatically attach to.
-    filetypes = { 'cpp' },
-    root_markers = { { '.p4config' }, '.git' },
+    cmd = {
+        'clangd',
+        '--background-index',
+        '--background-index-priority=low',
+        '--clang-tidy=false',
+        '--completion-style=detailed',
+        '--header-insertion=never',
+        '--pch-storage=memory',
+        '--limit-results=200',
+        '-j=8',
+    },
+    filetypes = { 'c', 'cpp' },
+    -- compile_commands.json / .clangd first so the index follows the compile database.
+    root_markers = { { 'compile_commands.json', '.clangd' }, { '.p4config' }, '.git' },
+}
+
+vim.lsp.config['csharp-ls'] = {
+    cmd = { 'csharp-ls' },
+    filetypes = { 'cs' },
+    root_markers = { { '.p4config' }, '.git' }
 }
 
 vim.lsp.enable('clangd')
@@ -157,7 +179,7 @@ vim.keymap.set('n', '<leader>D', vim.diagnostic.setqflist)   -- all diagnostics 
 require("tokyonight").setup({
     -- your configuration comes here
     -- or leave it empty to use the default settings
-    style = "moon", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+    style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
     light_style = "day", -- The theme is used when the background is set to light
     transparent = false, -- Enable this to disable setting the background color
     terminal_colors = true, -- Configure the colors used when opening a `:terminal` in [Neovim](https://github.com/neovim/neovim)
@@ -183,7 +205,7 @@ require("tokyonight").setup({
 -------------------------------------------------------------------------------
 require('notes').setup({
     root_path = "c:\\git\\docs",
-    path = "c:\\git\\docs\\ue\\2025.md",
+    path = "c:\\git\\docs\\ue\\2026.md",
 })
 
 -- Settings
@@ -226,9 +248,6 @@ vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 --vim.opt.updatetime = 50
 --vim.opt.colorcolumn = "140"
-vim.cmd('set termguicolors')
-vim.cmd('syntax enable')
-vim.cmd('filetype on')
 vim.cmd('set ignorecase')
 vim.cmd('set noswapfile')
 vim.cmd('set clipboard+=unnamedplus')
@@ -237,7 +256,6 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
-vim.opt.smartindent = true
 vim.opt.autoindent = true
 vim.opt.cindent = true
 
@@ -279,6 +297,12 @@ vim.cmd([[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]])
 vim.cmd([[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]])
 
 -- UE
+vim.api.nvim_create_user_command('UEctags',
+function(opts)
+    require'ctags'.generate(opts.fargs)
+end,
+{ nargs = '*', complete = 'dir' })
+
 vim.api.nvim_create_user_command('UEquickfix',
 function()
     require'utils'.read_quickfix()
@@ -341,12 +365,9 @@ vim.keymap.set('n', ';', '<cmd>FzfBuffers<CR>')
 --vim.keymap.set('n', 'n', 'nzz')
 --vim.keymap.set('n', 'N', 'Nzz')
 
--- General
-vim.keymap.set('n', '<leader>cp', '<cmd>CopyPath><CR>')
-
 -- Snippets
-vim.keymap.set('i', '<F5>', "<C-R>=strftime('%Y-%m-%d %H:%M')<CR>")
-vim.keymap.set('i', '<S-F5>', "<C-R>=strftime('%a %d/%m %H:%M')<CR>")
+vim.keymap.set('i', '<F3>', "<C-R>=strftime('%Y-%m-%d %H:%M')<CR>")
+vim.keymap.set('i', '<S-F3>', "<C-R>=strftime('%a %d/%m')<CR>")
 vim.keymap.set('i', '<F9>', "UE_DISABLE_OPTIMIZATION")
 vim.keymap.set('i', '<S-F9>', "UE_ENABLE_OPTIMIZATION")
 
@@ -361,7 +382,7 @@ vim.keymap.set('n', '<leader>qf', '<cmd>UEquickfix<CR>')
 vim.keymap.set('n', '<leader>ef', '<cmd>P4edit<CR>')
 vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
 vim.keymap.set('n', '<C-F9>', '<cmd>P4revgraph<CR>')
-vim.keymap.set('n', '<C-F10>', '<cmd>P4timelaps<CR>')
+vim.keymap.set('n', '<C-F10>', '<cmd>P4timelapse<CR>')
 
 -- Format with the attached language server (clangd uses the project's .clang-format), then save.
 vim.keymap.set('n', '<leader>w', function()
@@ -388,26 +409,6 @@ vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:lis
 
 vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
 vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
---vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
---vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
-
--- Toggle previous & next buffers stored within Harpoon list
---vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
---vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
-
---require("harpoon").setup({
---    menu = {
---        width = vim.api.nvim_win_get_width(0) - 10,
---    }
---})
---
---local mark = require('harpoon.mark')
---local ui = require('harpoon.ui')
---
---vim.keymap.set('n', '<leader>af', mark.add_file)
---vim.keymap.set('n', '<leader>df', mark.rm_file)
---vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
-
 -- Utils
 -------------------------------------------------------------------------------
 function _G.dump(...)

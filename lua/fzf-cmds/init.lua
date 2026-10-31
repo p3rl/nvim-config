@@ -38,25 +38,6 @@ function FzfCmds.buffers()
     end)()
 end
 
-
-function FzfCmds.tags()
-    local command = 'readtags -t tags -l'
-
-    coroutine.wrap(function()
-        local results = fzf(command)
-        if not results then return end
-
-        local tokens={}
-        for token in string.gmatch(results[1], "([^\t]+)") do
-            table.insert(tokens, token)
-        end
-
-        local file = vim.fn.fnameescape(tokens[2])
-        vim.cmd('e ' .. file)
-    end)()
-end
-
-
 function FzfCmds.tags()
   local command = 'readtags -t tags -l'
 
