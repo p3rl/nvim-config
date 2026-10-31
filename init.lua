@@ -66,9 +66,35 @@ require("lazy").setup({
         version = "1.*",
         dependencies = { "rafamadriz/friendly-snippets" },
         opts = {
-            keymap = { preset = "default" }
+            -- Tab accepts the selected (or first) item and jumps through snippet
+            -- placeholders; Ctrl-n/Ctrl-p move the selection.
+            keymap = { preset = "super-tab" },
+            sources = { default = { "lsp", "path", "snippets", "buffer" } },
         },
-        sources = { "lsp", "buffer" }
+    },
+    {
+        "nvim-lualine/lualine.nvim",
+        lazy = false,
+        opts = {
+            options = { theme = "auto", icons_enabled = false },
+            sections = {
+                lualine_x = {
+                    -- Language servers attached to the current buffer, e.g. "lsp: clangd".
+                    function()
+                        local names = vim.tbl_map(function(client) return client.name end,
+                            vim.lsp.get_clients({ bufnr = 0 }))
+                        return #names > 0 and "lsp: " .. table.concat(names, ",") or "lsp: none"
+                    end,
+                    -- Indentation of the current buffer, e.g. "spaces:4" or "tabs:4".
+                    function()
+                        return string.format("%s:%d", vim.bo.expandtab and "spaces" or "tabs", vim.bo.shiftwidth)
+                    end,
+                    "encoding",
+                    "fileformat",
+                    "filetype",
+                },
+            },
+        },
     }
 })
 -------------------------------------------------------------------------------
@@ -107,6 +133,17 @@ vim.lsp.config['clangd'] = {
 
 vim.lsp.enable('clangd')
 vim.lsp.enable('lua_ls')
+
+-- Keep diagnostics out of the buffer; view them on demand instead.
+vim.diagnostic.config({
+    virtual_text = false,
+    virtual_lines = false,
+    underline = false,
+    signs = false,
+    update_in_insert = false,
+})
+vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float)  -- diagnostics on the cursor line
+vim.keymap.set('n', '<leader>D', vim.diagnostic.setqflist)   -- all diagnostics in the quickfix list
 
 --require('lspconfig').clangd.setup({})
 --require('lspconfig').lua_ls.setup({})
@@ -153,9 +190,32 @@ require('notes').setup({
 -------------------------------------------------------------------------------
 
 --local colorscheme = "tokyonight"
-local colorscheme = "default"
+local colorscheme = "gruvbox"
 
+vim.o.background = "light"
 vim.cmd('colorscheme ' .. colorscheme)
+
+-- Cycle colorschemes: gruvbox dark -> gruvbox light -> tokyonight -> default.
+local colorschemes = {
+    { name = "gruvbox", background = "dark" },
+    { name = "gruvbox", background = "light" },
+    { name = "tokyonight", background = "dark" },
+    { name = "default", background = "dark" },
+}
+vim.api.nvim_create_user_command('CycleColorscheme', function()
+    local current = 0
+    for i, scheme in ipairs(colorschemes) do
+        -- tokyonight reports its style in the name, e.g. "tokyonight-moon".
+        if vim.startswith(vim.g.colors_name or "", scheme.name) and scheme.background == vim.o.background then
+            current = i
+        end
+    end
+    local next = colorschemes[current % #colorschemes + 1]
+    vim.o.background = next.background
+    vim.cmd.colorscheme(next.name)
+    print(string.format("%s (%s)", next.name, next.background))
+end, {})
+
 vim.g.mapleader = ","
 vim.opt.number = true
 vim.opt.relativenumber = false
@@ -191,6 +251,11 @@ vim.cmd([[command! EditBuildConfig :exec printf(':e %s', 'C:\Users\per.larsson\A
 
 -- Grep
 vim.cmd [[command! -nargs=+ -complete=dir -bar Grep lua require'grep'.async_grep(<q-args>)]]
+
+-- Build (CMake preset, errors to quickfix)
+vim.api.nvim_create_user_command('Build', function(opts) require'build'.run(opts.args) end,
+    { nargs = '?', complete = function() return require'build'.presets() end })
+vim.keymap.set('n', '<F7>', '<cmd>Build<CR>')
 
 -- Fzf
 vim.cmd [[command! FzfFiles :lua require'fzf-cmds'.files()]]
@@ -229,7 +294,7 @@ end,
 vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
     pattern = '*',
     callback = function(opts)
-        --require'p3rl.settings'.update_tabsettings(vim.bo.filetype)
+        require'tabsettings'.update(opts.buf)
     end
 })
 
@@ -238,6 +303,8 @@ vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
 vim.keymap.set('n', '<S-l>', '$')
 vim.keymap.set('n', '<S-h>', '0')
 vim.keymap.set("n", "<F1>", vim.cmd.Ex)
+vim.keymap.set("n", "<S-F1>", "<cmd>CycleColorscheme<CR>")
+vim.keymap.set("n", "<F13>", "<cmd>CycleColorscheme<CR>") -- what some terminals send for Shift-F1
 vim.keymap.set("n", "<leader>s", ":w<CR>")
 
 vim.keymap.set("i", "jk", "<Esc>")
@@ -296,8 +363,11 @@ vim.keymap.set('n', '<leader>rf', '<cmd>P4revert<CR>')
 vim.keymap.set('n', '<C-F9>', '<cmd>P4revgraph<CR>')
 vim.keymap.set('n', '<C-F10>', '<cmd>P4timelaps<CR>')
 
--- Format
-vim.keymap.set('n', '<leader>w', [[<cmd>write<CR><cmd>silent execute printf('!clang-format.exe -i %s', expand("%:p"))<CR><cmd>:e! %<CR>]])
+-- Format with the attached language server (clangd uses the project's .clang-format), then save.
+vim.keymap.set('n', '<leader>w', function()
+    vim.lsp.buf.format()
+    vim.cmd.write()
+end)
 
 -- Tags
 vim.keymap.set('n', '<F12>', [[<cmd>execute printf(":tag %s", expand("<cword>"))<CR>]])
