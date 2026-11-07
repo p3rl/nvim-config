@@ -340,6 +340,12 @@ vim.api.nvim_create_user_command('P4Log', function() require'p4'.log() end, {})
 -- :P4DiffPrev (or d in the :P4Log list) diffs a revision against the one before it.
 vim.api.nvim_create_user_command('P4DiffPrev', function() require'p4'.diff_prev() end, {})
 
+-- Shell: run commands in another terminal tab running scripts/nvim-listener.ps1.
+-- :Shell <cmd> sends a command, :ShellRepeat sends the last one again.
+vim.api.nvim_create_user_command('Shell', function(opts) require'shell'.send(opts.args) end,
+    { nargs = '+', complete = 'shellcmd' })
+vim.api.nvim_create_user_command('ShellRepeat', function() require'shell'.repeat_last() end, {})
+
 -- UE
 vim.api.nvim_create_user_command('UEctags',
 function(opts)
