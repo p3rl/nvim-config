@@ -64,9 +64,13 @@ require("lazy").setup({
         lazy = false,
         version = "1.*",
         opts = {
-            -- Tab accepts the selected (or first) item and jumps through snippet
-            -- placeholders; Ctrl-n/Ctrl-p move the selection.
-            keymap = { preset = "super-tab" },
+            -- Tab and Enter accept the selected (or first) item; Tab also jumps through
+            -- snippet placeholders. Ctrl-n/Ctrl-p move the selection. With the menu
+            -- closed, Enter inserts a newline as usual.
+            keymap = {
+                preset = "super-tab",
+                ["<CR>"] = { "select_and_accept", "fallback" },
+            },
             sources = { default = { "lsp", "path", "snippets", "buffer" } },
         },
     },
