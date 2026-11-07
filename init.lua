@@ -240,6 +240,9 @@ require('notes').setup({
 -- Settings
 -------------------------------------------------------------------------------
 
+-- Unreal Verse (syntax/verse.vim, ftplugin/verse.lua)
+vim.filetype.add({ extension = { verse = "verse" } })
+
 --local colorscheme = "tokyonight"
 local colorscheme = "gruvbox"
 
@@ -324,6 +327,14 @@ vim.cmd([[command! -nargs=? P4revgraph :lua require'p4'.revision_graph(<q-args>)
 vim.cmd([[command! -nargs=? P4timelapse :lua require'p4'.timelapse_view(<q-args>)]])
 vim.cmd([[command! -nargs=? P4history :lua require'p4'.history_view(<q-args>)]])
 vim.cmd([[command! -nargs=? P4depotpath :lua require'p4'.copy_depot_path(<q-args>)]])
+-- :P4Diff diffs the buffer against the synced revision; :P4Diff #head, :P4Diff #12, :P4Diff @12345 pick another.
+-- :P4DiffClose deletes the depot buffers and turns diff mode off.
+vim.api.nvim_create_user_command('P4Diff', function(opts) require'p4'.diff(opts.args) end, { nargs = '?' })
+vim.api.nvim_create_user_command('P4DiffClose', function() require'p4'.diff_close() end, {})
+-- :P4Log lists the current file's revisions in the quickfix list; <CR> on an entry opens that revision.
+vim.api.nvim_create_user_command('P4Log', function() require'p4'.log() end, {})
+-- :P4DiffPrev (or d in the :P4Log list) diffs a revision against the one before it.
+vim.api.nvim_create_user_command('P4DiffPrev', function() require'p4'.diff_prev() end, {})
 
 -- UE
 vim.api.nvim_create_user_command('UEctags',
