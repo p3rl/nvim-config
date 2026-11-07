@@ -130,18 +130,30 @@ vim.lsp.config('*', {
     capabilities = require('blink.cmp').get_lsp_capabilities(),
 })
 
+local clangd_args = {
+    '--background-index',
+    '--background-index-priority=low',
+    '--clang-tidy=false',
+    '--completion-style=detailed',
+    '--header-insertion=never',
+    '--pch-storage=memory',
+    '--limit-results=200',
+    '-j=8',
+}
+
 vim.lsp.config['clangd'] = {
-    cmd = {
-        'clangd',
-        '--background-index',
-        '--background-index-priority=low',
-        '--clang-tidy=false',
-        '--completion-style=detailed',
-        '--header-insertion=never',
-        '--pch-storage=memory',
-        '--limit-results=200',
-        '-j=8',
-    },
+    -- Unreal ships a clangd that matches the compiler compile_commands.json was generated with. The system
+    -- clangd rejects the MSVC STL headers (STL1000: expected Clang 19 or newer), so use the bundled one when
+    -- the workspace root has it and fall back to the clangd on PATH for any other project.
+    cmd = function(dispatchers, config)
+        local exe = 'clangd'
+        local epic = config.root_dir and (config.root_dir .. '/Engine/Binaries/Win64/EpicClang/20/bin/x64/EpicClangd.exe')
+        if epic and vim.uv.fs_stat(epic) then
+            exe = epic
+        end
+        return vim.lsp.rpc.start(vim.list_extend({ exe }, clangd_args), dispatchers,
+            { cwd = config.cmd_cwd, env = config.cmd_env })
+    end,
     filetypes = { 'c', 'cpp' },
     -- compile_commands.json / .clangd first so the index follows the compile database.
     root_markers = { { 'compile_commands.json', '.clangd' }, { '.p4config' }, '.git' },
@@ -155,6 +167,23 @@ vim.lsp.config['csharp-ls'] = {
 
 vim.lsp.enable('clangd')
 vim.lsp.enable('lua_ls')
+
+-- gd goes to the declaration and gD to the definition of the symbol under the cursor. Only bound in buffers with a
+-- server that supports them, so other buffers keep the built-in gd and gD.
+vim.api.nvim_create_autocmd('LspAttach', {
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client == nil then
+            return
+        end
+        if client:supports_method('textDocument/declaration') then
+            vim.keymap.set('n', 'gd', vim.lsp.buf.declaration, { buffer = args.buf, desc = 'LSP: go to declaration' })
+        end
+        if client:supports_method('textDocument/definition') then
+            vim.keymap.set('n', 'gD', vim.lsp.buf.definition, { buffer = args.buf, desc = 'LSP: go to definition' })
+        end
+    end,
+})
 
 -- Keep diagnostics out of the buffer; view them on demand instead.
 vim.diagnostic.config({
@@ -245,7 +274,7 @@ vim.opt.wrap = false
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
 vim.opt.scrolloff = 8
-vim.opt.signcolumn = "yes"
+vim.opt.signcolumn = "auto"
 --vim.opt.updatetime = 50
 --vim.opt.colorcolumn = "140"
 vim.cmd('set ignorecase')
@@ -408,7 +437,7 @@ vim.keymap.set("n", "<leader>af", function() harpoon:list():add() end)
 vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
 
 vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
-vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
+vim.keymap.set("n", "<C-j>", function() harpoon:list():select(2) end)
 -- Utils
 -------------------------------------------------------------------------------
 function _G.dump(...)
